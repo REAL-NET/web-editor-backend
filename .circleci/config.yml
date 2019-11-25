@@ -1,0 +1,62 @@
+version: 2.1
+executors: 
+  docker-publisher: 
+    environment: 
+      GITHUB_ORG: real-net
+      REPOSITORY: web-editor-backend
+    docker: 
+      - image: mcr.microsoft.com/dotnet/core/aspnet:3.0
+commands: 
+  install-docker: 
+    description: "Installing docker which is not represented in ASP.NET image"
+    steps: 
+      - setup_remote_docker
+      - run:
+          name: Install Docker client
+          command: |
+            set -x
+            VER="17.03.0-ce"
+            curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
+            tar -xz -C /tmp -f /tmp/docker-$VER.tgz
+            mv /tmp/docker/* /usr/bin
+  build-service:
+    description: "Build service, create docker image and archive it"
+    parameters:
+      image_name:
+        type: string
+      dir:
+        type: string
+        default: "."
+    steps:
+      - checkout
+      - install-docker 
+      - run: 
+          name: Build Docker image of << parameters.image_name >>
+          command: |
+            docker build -t << parameters.image_name >> << parameters.dir >>
+      - run: 
+          name: Archive Docker image or << parameters.image_name >>
+          command: docker save -o << parameters.image_name >>.tar << parameters.image_name >>
+      - persist_to_workspace: 
+          root: .
+          paths: 
+            - ./<< parameters.image_name >>.tar
+  publish-service:
+    description: "Publish service as Docker image to GitHub"
+    parameters:
+      image_name:
+        type: string
+    steps:
+      - attach_workspace: 
+          at: /tmp/workspace
+      - install-docker 
+      - run:
+          name: Load archived Docker image of << parameters.image_name >>
+          command: docker load -i /tmp/workspace/<< parameters.image_name >>.tar
+      - run:
+          name: Publish << parameters.image_name >> Docker Image to GitHub
+          command: |
+            REGISTRY_HTTP_RELATIVEURLS=true
+            docker login docker.pkg.github.com -u "$GITHUB_USERNAME" -p "$GITHUB_PUBLISH_TOKEN"
+            docker tag << parameters.image_name >> docker.pkg.github.com/$GITHUB_ORG/$REPOSITORY/<< parameters.image_name >>:$CIRCLE_BRANCH
+            docker push docker.pkg.github.com/$GITHUB_ORG/$REPOSITORY/<< parameters.image_name >>:$CIRCLE_BRANCH
