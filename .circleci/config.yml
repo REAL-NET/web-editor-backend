@@ -60,3 +60,23 @@ commands:
             docker login docker.pkg.github.com -u "$GITHUB_USERNAME" -p "$GITHUB_PUBLISH_TOKEN"
             docker tag << parameters.image_name >> docker.pkg.github.com/$GITHUB_ORG/$REPOSITORY/<< parameters.image_name >>:$CIRCLE_BRANCH
             docker push docker.pkg.github.com/$GITHUB_ORG/$REPOSITORY/<< parameters.image_name >>:$CIRCLE_BRANCH
+jobs: 
+  build-auth:
+    executor: docker-publisher
+    steps: 
+      - build-service:
+          image_name: "auth"
+          dir: "Auth/"
+  publish-auth:
+    executor: docker-publisher
+    steps:
+      - publish-service:
+          image_name: "auth"
+workflows: 
+  version: 2
+  build: 
+    jobs: 
+      - build-auth
+      - publish-auth: 
+          requires: 
+            - build-auth
