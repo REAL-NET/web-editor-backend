@@ -72,6 +72,28 @@ jobs:
     steps:
       - publish-service:
           image_name: "auth"
+  build-gateway:
+    executor: docker-publisher
+    steps: 
+      - build-service:
+          image_name: "gateway"
+          dir: "Gateway/"
+  publish-gateway:
+    executor: docker-publisher
+    steps:
+      - publish-service:
+          image_name: "gateway"
+  build-test:
+    executor: docker-publisher
+    steps: 
+      - build-service:
+          image_name: "test"
+          dir: "Test/"
+  publish-test:
+    executor: docker-publisher
+    steps:
+      - publish-service:
+          image_name: "test"
 workflows: 
   version: 2
   build: 
@@ -80,3 +102,11 @@ workflows:
       - publish-auth: 
           requires: 
             - build-auth
+      - build-gateway
+      - publish-gateway: 
+          requires: 
+            - build-gateway
+      - build-test
+      - publish-test: 
+          requires: 
+            - build-test
