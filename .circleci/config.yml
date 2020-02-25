@@ -83,6 +83,17 @@ jobs:
     steps:
       - publish-service:
           image_name: "gateway"
+  build-repo:
+    executor: docker-publisher
+    steps: 
+      - build-service:
+          image_name: "repo"
+          dir: "Repo/"
+  publish-repo:
+    executor: docker-publisher
+    steps:
+      - publish-service:
+          image_name: "repo"
   build-test:
     executor: docker-publisher
     steps: 
@@ -106,6 +117,10 @@ workflows:
       - publish-gateway: 
           requires: 
             - build-gateway
+      - build-repo
+      - publish-repo: 
+          requires: 
+            - build-repo
       - build-test
       - publish-test: 
           requires: 
