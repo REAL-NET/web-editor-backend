@@ -28,7 +28,17 @@ commands:
         type: string
         default: "."
     steps:
+      - run: 
+          name: Install Git
+          command: |
+            apt-get update
+            apt-get install -y git
       - checkout
+      - run: 
+          name: Submodules update
+          command: |
+            git submodule init
+            git submodule update
       - install-docker 
       - run: 
           name: Build Docker image of << parameters.image_name >>
@@ -60,7 +70,7 @@ commands:
             docker login docker.pkg.github.com -u "$GITHUB_USERNAME" -p "$GITHUB_PUBLISH_TOKEN"
             docker tag << parameters.image_name >> docker.pkg.github.com/$GITHUB_ORG/$REPOSITORY/<< parameters.image_name >>:$CIRCLE_BRANCH
             docker push docker.pkg.github.com/$GITHUB_ORG/$REPOSITORY/<< parameters.image_name >>:$CIRCLE_BRANCH
-jobs: 
+jobs:
   build-auth:
     executor: docker-publisher
     steps: 
