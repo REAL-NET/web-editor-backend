@@ -5,6 +5,7 @@ using System.Linq;
 using AutoMapper;
 
 using Repo;
+using Repo.Serializer;
 using RepoAPI.Models;
 
 namespace RepoAPI.Controllers
@@ -20,13 +21,24 @@ namespace RepoAPI.Controllers
         /// <summary>
         /// Saves repository into file.
         /// </summary>
-        /// <param name="path">Path of the file.</param>
-        [HttpPost("save/{path}")]
-        public void SaveRepo(string path)
+        [HttpPost("save")]
+        public void SaveRepo([FromBody] SerializationRequest request)
         {
             lock (Locker.obj)
             {
-                RepoContainer.CurrentRepo().Save(path);
+                RepoContainer.CurrentRepo().Save(request.FileName);
+            }
+        }
+        
+        /// <summary>
+        /// Loads repository from file.
+        /// </summary>
+        [HttpPost("load")]
+        public void LoadRepo([FromBody] SerializationRequest request)
+        {
+            lock (Locker.obj)
+            {
+                RepoContainer.Load(request.FileName);
             }
         }
     }

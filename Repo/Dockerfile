@@ -2,6 +2,9 @@ FROM mcr.microsoft.com/dotnet/core/sdk:3.0 AS build
 WORKDIR /app
 EXPOSE 80
 
+# create folder for temporary storing repos
+RUN mkdir serialized
+
 # copy everything else and build app
 COPY . .
 RUN dotnet restore
