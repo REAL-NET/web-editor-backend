@@ -1,15 +1,13 @@
 using System;
 using System.Net.Http;
 using System.Text;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
 namespace Storage.Requests
 {
-    public class RepoRequest
+    public static class RepoRequest
     {
-        private static HttpClient _client = new HttpClient();
+        private static readonly HttpClient Client = new HttpClient();
         private static string _host;
         private static int _port;
         
@@ -43,7 +41,7 @@ namespace Storage.Requests
                 Content = new StringContent(JsonConvert.SerializeObject(body), Encoding.Default, "application/json"),
                 RequestUri = new Uri(uri)
             };
-            var result = _client.SendAsync(httpRequestMessage).Result;
+            var result = Client.SendAsync(httpRequestMessage).Result;
             if (!result.IsSuccessStatusCode)
             {
                 throw new RepoRequestException($"Request failed to repo from storage: {result.StatusCode}");

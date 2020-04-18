@@ -34,5 +34,10 @@ namespace Storage.Models
         {
             return obj is Record record && SaveId.Equals(record.SaveId);
         }
+
+        public override int GetHashCode()
+        {
+            return SaveId.GetHashCode();
+        }
     }
 }
