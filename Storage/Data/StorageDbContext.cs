@@ -9,6 +9,6 @@ namespace Storage.Data
         {
         }
         
-        public DbSet<Models.Database.Record> StorageDb { get; set; }
+        public DbSet<Models.Database.DbRecord> StorageDb { get; set; }
     }
 }

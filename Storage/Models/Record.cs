@@ -1,22 +1,10 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Storage.Models.Database
+namespace Storage.Models
 {
-    /// <summary>
-    /// Represents the type of record for EF database.
-    /// Contains info about saved repo.
-    /// </summary>
     public class Record
     {
-        /// <summary>
-        /// Autoincremental parameter to be primary key in database
-        /// </summary>
-        [Required]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
-        
         /// <summary>
         /// Username which owns the saved repository.
         /// </summary>
@@ -41,5 +29,10 @@ namespace Storage.Models.Database
         /// Optional field than could be used for storing additional information.
         /// </summary>
         public string Info { get; set; }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Record record && SaveId.Equals(record.SaveId);
+        }
     }
 }
