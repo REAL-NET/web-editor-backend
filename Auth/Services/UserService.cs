@@ -24,6 +24,7 @@ namespace Auth.Services
         }
         public string Authenticate([NotNull] string login, [NotNull] string password)
         {
+            password = HashService.HashPassword(password);
             var users = _usersDb.Users.Where(u => u.Login.Equals(login) && u.Password.Equals(password));
             if (!users.Any())
             {
@@ -50,6 +51,7 @@ namespace Auth.Services
 
         public bool Register([NotNull] UserInfo userInfo)
         {
+            HashService.HashPassword(userInfo);
             var users = _usersDb.Users.Where(u => u.Login.Equals(userInfo.Login));
             if (users.Any())
             {
