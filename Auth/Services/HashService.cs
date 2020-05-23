@@ -10,12 +10,13 @@ namespace Auth.Services
         
         public static void HashPassword(UserInfo userInfo)
         {
-            userInfo.Password = HashPassword(userInfo.Password);
+            userInfo.Password = HashPassword(userInfo.Login, userInfo.Password);
         }
         
-        public static string HashPassword(string password)
+        public static string HashPassword(string login, string password)
         {
-            return Encoding.UTF8.GetString(_sha256.ComputeHash(Encoding.UTF8.GetBytes(password)));
+            var salted = login + password;
+            return Encoding.UTF8.GetString(_sha256.ComputeHash(Encoding.UTF8.GetBytes(salted)));
         }
     }
 }

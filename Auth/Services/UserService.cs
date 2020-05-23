@@ -24,7 +24,7 @@ namespace Auth.Services
         }
         public string Authenticate([NotNull] string login, [NotNull] string password)
         {
-            password = HashService.HashPassword(password);
+            password = HashService.HashPassword(login, password);
             var users = _usersDb.Users.Where(u => u.Login.Equals(login) && u.Password.Equals(password));
             if (!users.Any())
             {
