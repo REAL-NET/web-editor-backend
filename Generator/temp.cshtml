@@ -1,0 +1,127 @@
+@using RepoAPI.Models;
+using System;
+using System.Linq;
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
+
+namespace Generator
+{
+    class Program
+    {
+            @{
+                List<Node> modelNodes = new List<Node>();
+                var i = 0;
+            }
+            
+            @foreach (var node in Model.Nodes)
+            {
+                modelNodes.Add(node);
+            }    
+            @foreach (var node in modelNodes)
+            {
+  <text>
+  </text>
+                @if (@node.Class.Name == "AndOperation"){
+  <text>private static AndOperation element</text><text>@modelNodes.IndexOf(node)</text><text>;</text>
+                }
+                @if (@node.Class.Name == "LightCondition" || @node.Class.Name == "HotCondition" || @node.Class.Name == "DarkCondition" || @node.Class.Name == "ColdCondition" || @node.Class.Name == "Entered" || @node.Class.Name == "Exited"){
+  <text>private static Condition element</text><text>@modelNodes.IndexOf(node)</text><text>;</text>
+                }
+                @if (@node.Class.Name == "HeatingOn" || @node.Class.Name == "KettleOn" || @node.Class.Name == "LightOn" || @node.Class.Name == "ElectricityOff"  || @node.Class.Name == "HeatingOff" || @node.Class.Name == "LightOff" || @node.Class.Name == "TvOff"){
+  <text>private static Actuator element</text><text>@modelNodes.IndexOf(node)</text><text>;</text>
+                }
+                i++;
+            }
+        public static void Main(string[] args)
+        {
+            @foreach (var x in modelNodes) 
+            { 
+      <text> 
+      </text>
+             	var index = modelNodes.IndexOf(x);
+                if (x.Class.Name == "DarkCondition" || x.Class.Name == "ColdCondition"){
+	                var value = x.Attributes.Where(y => y.Name == "value").FirstOrDefault().StringValue;
+      <text>element</text>@index<text> = new Condition(@index, @value, false);</text>
+                }
+                if (x.Class.Name == "LightCondition" || x.Class.Name == "HotCondition"){
+	                var value = x.Attributes.Where(y => y.Name == "value").FirstOrDefault().StringValue;
+      <text>element</text>@index<text> = new Condition(@index, @value, true);</text>
+                }
+                if (x.Class.Name == "Entered" || x.Class.Name == "Exited"){
+      <text>element</text>@index<text> = new Condition(@index);</text>
+                }
+
+
+                if (x.Class.Name == "AndOperation"){
+      <text>element</text>@index<text> = new AndOperation(@index);</text>
+                }
+
+                if (x.Class.Name == "HeatingOn" || x.Class.Name == "KettleOn" || x.Class.Name == "LightOn"){
+	                var value = x.Attributes.Where(y => y.Name == "value").FirstOrDefault().StringValue;
+      <text>element</text>@index<text> = new Actuator(@index, @value);</text>
+                }
+                if (x.Class.Name == "HeatingOff" || x.Class.Name == "TvOff" || x.Class.Name == "LightOff" || x.Class.Name == "ElectricityOff"){
+      <text>element</text>@index<text> = new Actuator(@index);</text>
+                }
+
+<text> </text>
+      <text>IObservable<int> observable</text>@index<text> =
+				System.Reactive.Linq.Observable.FromEventPattern<int>(
+				h => element</text>@index<text>.Event += h, h => element</text>@index<text>.Event -= h)
+				.Select(e => e.EventArgs).Synchronize().DistinctUntilChanged();
+			IObserver<int> observer</text>@index<text> = Observer.Create<int>(x => element</text>@index<text>.Action(x));
+			ISubject<int> reactElement</text>@index<text> = Subject.Create<int>(observer</text>@index<text>, observable</text>@index<text>);</text>
+            }
+
+
+            @foreach (var e in Model.Edges)
+            {
+                if ((e as Edge).To.Class.Name == "AndOperation")
+                {
+      <text> 
+      </text>
+      <text>element</text><text>@modelNodes.IndexOf((e as Edge).To as Node)</text><text>.IncomingValues.Add(</text><text>@modelNodes.IndexOf((e as Edge).From as Node)</text><text>, null);</text>
+                }
+            }
+
+
+            @{var j = 0;}
+            @foreach (var e in Model.Edges)
+            {
+                var source = (e as Edge).From as Node;
+	            var target = (e as Edge).To as Node;
+	  <text>var sub</text>@j<text> = reactElement</text><text>@modelNodes.IndexOf(source)</text><text>.Subscribe(reactElement</text><text>@modelNodes.IndexOf(target)</text><text>);</text>
+                j++;
+            }
+            
+			@foreach (var n in modelNodes)
+            {
+                @if (@n.Class.Name == "LightCondition" || @n.Class.Name == "HotCondition" || @n.Class.Name == "DarkCondition" || @n.Class.Name == "ColdCondition" || @n.Class.Name == "Entered" || @n.Class.Name == "Exited"){
+  
+	  <text>SensorSim sensorSim</text><text>@modelNodes.IndexOf(n)</text><text> = new SensorSim();
+			sensorSim</text><text>@modelNodes.IndexOf(n)</text><text>.Index = </text><text>@modelNodes.IndexOf(n)</text><text>;
+            Console.WriteLine("Sensor{0} is Active", </text><text>@modelNodes.IndexOf(n)</text><text>);
+
+            IObservable<int> observableForSimulation</text><text>@modelNodes.IndexOf(n)</text><text> =
+						System.Reactive.Linq.Observable.FromEventPattern<int>(
+							h => sensorSim</text><text>@modelNodes.IndexOf(n)</text><text>.Event += h,
+							h => sensorSim</text><text>@modelNodes.IndexOf(n)</text><text>.Event -= h)
+							.Select(e => e.EventArgs)
+							.Synchronize().DistinctUntilChanged();
+
+            observableForSimulation</text><text>@modelNodes.IndexOf(n)</text><text>.Subscribe(reactElement</text><text>@modelNodes.IndexOf(n)</text><text>);</text>
+                 }
+            }
+			
+
+
+
+			@{ <text>Console.ReadLine();</text>
+			}
+
+
+
+        }
+    }
+}
