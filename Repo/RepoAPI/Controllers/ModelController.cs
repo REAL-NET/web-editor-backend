@@ -46,6 +46,37 @@ namespace RepoAPI.Controllers
         [HttpGet("{modelName}")]
         public ActionResult<Model> Model(string modelName) =>
             _mapper.Map<Model>(RepoContainer.CurrentRepo().Model(modelName));
+        
+        /// <summary>
+        /// Returns ids of not Abstract model elements by model name.
+        /// </summary>
+        /// <returns>Ids of not Abstract model elements by model name.</returns>
+        /// <param name="modelName">Model name.</param>
+        [HttpGet("{modelName}/notAbstractTypes")]
+        public IEnumerable<int> ModelNotAbstractTypesIds(string modelName)
+        => RepoContainer.CurrentRepo().Model(modelName).Elements
+                .Where(el => !el.IsAbstract).Select(el => el.Id);
+        
+        /// <summary>
+        /// Returns ids of not Abstract model nodes by model name.
+        /// </summary>
+        /// <returns>Ids of not Abstract model nodes by model name.</returns>
+        /// <param name="modelName">Model name.</param>
+        [HttpGet("{modelName}/notAbstractNodes")]
+        public IEnumerable<Node> ModelNotAbstractNodes(string modelName)
+            => _mapper.Map<IEnumerable<Node>>(RepoContainer.CurrentRepo().Model(modelName).Nodes
+                .Where(n => !n.IsAbstract));
+        
+        /// <summary>
+        /// Returns ids of not Abstract model edges by model name.
+        /// </summary>
+        /// <returns>Ids of not Abstract model edges by model name.</returns>
+        /// <param name="modelName">Model name.</param>
+        [HttpGet("{modelName}/notAbstractEdges")]
+        public IEnumerable<Edge> ModelNotAbstractEdges(string modelName)
+            => _mapper.Map<IEnumerable<Edge>>(RepoContainer.CurrentRepo().Model(modelName).Edges
+                .Where(n => !n.IsAbstract));
+            
 
         /// <summary>
         /// Creates new model from metamodel.
