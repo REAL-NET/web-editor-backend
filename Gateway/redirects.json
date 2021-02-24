@@ -25,6 +25,45 @@
       "UpstreamHttpMethod": [ "POST" ]
     },
     {
+      "DownstreamPathTemplate": "/swagger",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "host.docker.internal",
+          "Port": 8004
+        }
+      ],
+      "UpstreamPathTemplate": "/api/repo/swagger",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "Priority": 2
+    },
+    {
+      "DownstreamPathTemplate": "/swagger/{next}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "host.docker.internal",
+          "Port": 8004
+        }
+      ],
+      "UpstreamPathTemplate": "/api/repo/swagger/{next}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "Priority": 1
+    },
+    {
+      "DownstreamPathTemplate": "/api/{next}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "host.docker.internal",
+          "Port": 8004
+        }
+      ],
+      "UpstreamPathTemplate": "/api/repo/{next}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "Priority": 0
+    },
+    {
       "DownstreamPathTemplate": "/test/hello",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [

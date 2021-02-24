@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Repo", "Repo\Repo.Source\Repo.fsproj", "{7B8BBAE6-4A8D-43FA-88DD-52B5F07540E1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RepoAPI", "RepoAPI\RepoAPI.csproj", "{6E08A2E4-99FA-47D8-B629-24FA306B72E1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7B8BBAE6-4A8D-43FA-88DD-52B5F07540E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B8BBAE6-4A8D-43FA-88DD-52B5F07540E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B8BBAE6-4A8D-43FA-88DD-52B5F07540E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B8BBAE6-4A8D-43FA-88DD-52B5F07540E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E08A2E4-99FA-47D8-B629-24FA306B72E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E08A2E4-99FA-47D8-B629-24FA306B72E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E08A2E4-99FA-47D8-B629-24FA306B72E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E08A2E4-99FA-47D8-B629-24FA306B72E1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
