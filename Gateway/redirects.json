@@ -64,6 +64,45 @@
       "Priority": 0
     },
     {
+      "DownstreamPathTemplate": "/swagger",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "host.docker.internal",
+          "Port": 8006
+        }
+      ],
+      "UpstreamPathTemplate": "/api/storage/swagger",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "Priority": 2
+    },
+    {
+      "DownstreamPathTemplate": "/swagger/{next}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "host.docker.internal",
+          "Port": 8006
+        }
+      ],
+      "UpstreamPathTemplate": "/api/storage/swagger/{next}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "Priority": 1
+    },
+    {
+      "DownstreamPathTemplate": "/storage/{next}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "host.docker.internal",
+          "Port": 8006
+        }
+      ],
+      "UpstreamPathTemplate": "/api/storage/{next}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "Priority": 0
+    },
+    {
       "DownstreamPathTemplate": "/test/hello",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
