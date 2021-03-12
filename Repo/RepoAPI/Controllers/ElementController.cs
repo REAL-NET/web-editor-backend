@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using AutoMapper;
-
 using Repo;
+using Repo.DeepMetamodel;
 using RepoAPI.Models;
 
 namespace RepoAPI.Controllers
@@ -32,20 +31,20 @@ namespace RepoAPI.Controllers
         /// </summary>
         /// <returns>The element.</returns>
         /// <param name="modelName">Model name.</param>
-        /// <param name="id">Number key.</param>
-        [HttpGet("{modelName}/{id}")]
-        public ActionResult<Element> GetElement(string modelName, int id) =>
-            _mapper.Map<Element>(GetElementFromRepo(modelName, id));
+        /// <param name="name">Element name</param>
+        [HttpGet("{modelName}/{name}")]
+        public ActionResult<Element> GetElement(string modelName, string name) =>
+            _mapper.Map<Element>(GetElementFromRepo(modelName, name));
 
         /// <summary>
         /// Returns the node in model specified by its unique number key.
         /// </summary>
         /// <returns>The node.</returns>
         /// <param name="modelName">Model name.</param>
-        /// <param name="id">Number key</param>
-        [HttpGet("{modelName}/{id}/asNode")]
-        public ActionResult<Node> GetNode(string modelName, int id) =>
-            _mapper.Map<Node>((INode)GetElementFromRepo(modelName, id));
+        /// <param name="name">Element name</param>
+        [HttpGet("{modelName}/{name}/asNode")]
+        public ActionResult<Node> GetNode(string modelName, string name) =>
+            _mapper.Map<Node>((INode)GetElementFromRepo(modelName, name));
 
 
         /// <summary>
@@ -53,10 +52,10 @@ namespace RepoAPI.Controllers
         /// </summary>
         /// <returns>The edge.</returns>
         /// <param name="modelName">Model name.</param>
-        /// <param name="id">Number key.</param>
-        [HttpGet("{modelName}/{id}/asEdge")]
-        public ActionResult<Edge> GetEdge(string modelName, int id) =>
-            _mapper.Map<Edge>((IEdge)GetElementFromRepo(modelName, id));
+        /// <param name="name">Element name</param>
+        [HttpGet("{modelName}/{name}/asEdge")]
+        public ActionResult<Relationship> GetEdge(string modelName, string name) =>
+            _mapper.Map<Relationship>((IDeepRelationship) GetElementFromRepo(modelName, name));
 
 
         /// <summary>
@@ -64,157 +63,157 @@ namespace RepoAPI.Controllers
         /// </summary>
         /// <returns>The element.</returns>
         /// <param name="modelName">Model name.</param>
-        /// <param name="parentId">Parent identifier.</param>
-        [HttpPost("{modelName}/{parentId}")]
-        public ActionResult<int> CreateElement(string modelName, int parentId)
+        /// <param name="parentName">Parent name.</param>
+        /// <param name="name">New element name.</param>
+        /// <param name="level">New element level.</param>
+        /// <param name="potency">New element potency.</param>
+        [HttpPost("{modelName}/{parentName}/{name}/{level}/{potency}")]
+        public ActionResult<Element> CreateElement(string modelName, string parentName, string name, int level, int potency)
         {
             lock (Locker.obj)
             {
-                //throw new NullReferenceException();
-                IModel meta = GetModelFromRepo(modelName).Metamodel;
-                IElement parentElement = GetElementFromRepo(meta.Name, parentId);
-                IElement result = GetModelFromRepo(modelName).CreateElement(parentElement);
-                return result.Id;
-            }
-        }
-
-
-        /// <summary>
-        /// Changes the name of the element.
-        /// </summary>
-        /// <param name="modelName">Model name.</param>
-        /// <param name="elementId">Element identifier.</param>
-        /// <param name="newName">New name.</param>
-        [HttpPut("{modelName}/{elementId}/name/{newName}")]
-        public void ChangeElementName(string modelName, int elementId, string newName)
-        {
-            lock (Locker.obj)
-            {
-                GetElementFromRepo(modelName, elementId).Name = newName;
+                IDeepModel meta = GetModelFromRepo(modelName).Metamodel;
+                IDeepNode parentElement = (IDeepNode) GetElementFromRepo(meta.Name, parentName);
+                IDeepElement result = GetModelFromRepo(modelName).InstantiateNode(name, parentElement, level, potency);
+                return _mapper.Map<Element>(result);
             }
         }
 
         /// <summary>
-        /// Changes the edge "from" element.
+        /// Returns all attributes for given element.
         /// </summary>
         /// <param name="modelName">Model name.</param>
-        /// <param name="edgeId">Edge identifier.</param>
-        /// <param name="elementId">"From" element identifier.</param>
-        [HttpPut("{modelName}/{edgeId}/from/{elementId}")]
-        public void ChangeEdgeFrom(string modelName, int edgeId, int elementId)
+        /// <param name="elementName">Element name.</param>
+        [HttpGet("{modelName}/{name}/attributes")]
+        public ActionResult<IEnumerable<Attribute>> GetAttributes(string modelName, string elementName)
         {
             lock (Locker.obj)
             {
-                ((IEdge)GetElementFromRepo(modelName, edgeId)).From =
-                    GetElementFromRepo(modelName, elementId);
+                return _mapper.Map<List<Attribute>>(GetElementFromRepo(modelName, elementName).Attributes);
             }
         }
-
+        
+        
         /// <summary>
-        /// Changes the edge "to" element.
+        /// Returns attribute for given element with specified name.
         /// </summary>
         /// <param name="modelName">Model name.</param>
-        /// <param name="edgeId">Edge identifier.</param>
-        /// <param name="elementId">"To" element identifier.</param>
-        [HttpPut("{modelName}/{edgeId}/to/{elementId}")]
-        public void ChangeEdgeTo(string modelName, int edgeId, int elementId)
+        /// <param name="elementName">Element name.</param>
+        /// <param name="attributeName">Attribute name.</param>
+        [HttpGet("{modelName}/{name}/attribute/{attributeName}")]
+        public ActionResult<Attribute> GetAttribute(string modelName, string elementName, string attributeName)
         {
             lock (Locker.obj)
             {
-                ((IEdge)GetElementFromRepo(modelName, edgeId)).To =
-                    GetElementFromRepo(modelName, elementId);
+                var attributes = GetElementFromRepo(modelName, elementName).Attributes;
+                var attribute = attributes.First(it => it.Name == attributeName);
+                return _mapper.Map<Attribute>(attribute);
             }
         }
-
+        
 
         /// <summary>
         /// Adds the attribute into element.
         /// </summary>
         /// <param name="modelName">Model name.</param>
-        /// <param name="elementId">Element identifier.</param>
+        /// <param name="name">Element name.</param>
         /// <param name="attributeName">Attribute name.</param>
-        /// <param name="attributeKind">Attribute kind.</param>
-        /// <param name="defaultValue">Default value.</param>
-        [HttpPost("{modelName}/{elementId}/attribute/{attributeName}/{attributeKind}/{defaultValue}")]
-        public void AddAttribute(string modelName, int elementId,
-            string attributeName, Models.AttributeKind attributeKind, string defaultValue)
+        /// <param name="type">Type element name.</param>
+        /// <param name="level">New element level.</param>
+        /// <param name="potency">New element potency.</param>
+        [HttpPost("{modelName}/{name}/attribute/{attributeName}/{type}/{level}/{potency}")]
+        public ActionResult<Attribute> AddAttribute(string modelName, string name,
+            string attributeName, string type, int level, int potency)
         {
             lock (Locker.obj)
             {
-                GetElementFromRepo(modelName, elementId).AddAttribute(
-                    attributeName,
-                    _mapper.Map<Repo.AttributeKind>(attributeKind),
-                    defaultValue);
+                var typeElement = GetElementFromRepo(modelName, type);
+                var attribute = GetElementFromRepo(modelName, name)
+                    .AddAttribute(attributeName, typeElement, level, potency);
+                return _mapper.Map<Attribute>(attribute);
             }
         }
 
+        
         /// <summary>
-        /// Changes the attribute value.
+        /// Returns element slots
         /// </summary>
         /// <param name="modelName">Model name.</param>
-        /// <param name="elementId">Element identifier.</param>
-        /// <param name="attributeName">Attribute name.</param>
-        /// <param name="newValue">New value.</param>
-        [HttpPut("{modelName}/{elementId}/attribute/{attributeName}/value/{newValue}")]
-        public void ChangeAttributeValue(string modelName, int elementId,
-            string attributeName, string newValue)
+        /// <param name="elementName">Element name.</param>
+        [HttpGet("{modelName}/{name}/slots")]
+        public ActionResult<IEnumerable<Slot>> GetSlots(string modelName, string elementName)
         {
             lock (Locker.obj)
             {
-                //var infrastructure = new InfrastructureSemantic(RepoContainer.CurrentRepo());
-                //var elem = GetElementFromRepo(modelName, elementId);
-                //infrastructure.Element.SetAttributeValue(elem, attributeName, newValue);
-                GetElementFromRepo(modelName, elementId)
-                    .Attributes
-                    .Where(attribute => (attribute.Name == attributeName))
-                    .First()
-                    .StringValue = newValue;
+                var element = GetElementFromRepo(modelName, elementName);
+                return _mapper.Map<List<Slot>>(element.Slots);
             }
         }
-
+        
+        
         /// <summary>
-        /// Changes the attribute reference. (Not supported in current version)
+        /// Returns slot for given element with specified attribute name.
         /// </summary>
         /// <param name="modelName">Model name.</param>
-        /// <param name="elementId">Element identifier.</param>
+        /// <param name="elementName">Element name.</param>
         /// <param name="attributeName">Attribute name.</param>
-        /// <param name="newReference">New reference element identifier.</param>
-        [HttpPut("{modelName}/{elementId}/attribute/{attributeName}/reference/{newReference}")]
-        public void ChangeAttributeReference(string modelName, int elementId,
-            string attributeName, int newReference)
+        [HttpGet("{modelName}/{name}/slot/{attributeName}")]
+        public ActionResult<Slot> GetSlot(string modelName, string elementName, string attributeName)
         {
             lock (Locker.obj)
             {
-                GetElementFromRepo(modelName, elementId)
-                    .Attributes
-                    .Where(attribute => (attribute.Name == attributeName))
-                    .First()
-                    .ReferenceValue = GetElementFromRepo(modelName, newReference);
+                var attributes = GetElementFromRepo(modelName, elementName).Slots;
+                var attribute = attributes.First(it => it.Attribute.Name == attributeName);
+                return _mapper.Map<Slot>(attribute);
+            }
+        }
+        
+        
+        /// <summary>
+        /// Adds the slot into element.
+        /// </summary>
+        /// <param name="modelName">Model name.</param>
+        /// <param name="elementName">Element name.</param>
+        /// <param name="attributeName">Attribute name.</param>
+        /// <param name="value">Value element name.</param>
+        /// <param name="level">New element level.</param>
+        /// <param name="potency">New element potency.</param>
+        [HttpPost("{modelName}/{elementName}/attribute/{attributeName}/{value}/{level}/{potency}")]
+        public ActionResult<Slot> AddSlot(string modelName, string elementName,
+            string attributeName, string value, int level, int potency)
+        {
+            lock (Locker.obj)
+            {
+                var valueElement = GetElementFromRepo(modelName, value);
+                var element = GetElementFromRepo(modelName, elementName);
+                var attribute = element.Attributes.First(it => it.Name == attributeName);
+                var slot = element.AddSlot(attribute, valueElement, level, potency);
+                return _mapper.Map<Slot>(slot);
             }
         }
 
+        
         /// <summary>
         /// Removes the element from model.
         /// </summary>
         /// <param name="modelName">Model name.</param>
-        /// <param name="elementId">Element identifier.</param>
-        [HttpDelete("{modelName}/{elementId}")]
-        public void DeleteElement(string modelName, int elementId)
+        /// <param name="name">Element identifier.</param>
+        [HttpDelete("{modelName}/{name}")]
+        public void DeleteElement(string modelName, string name)
         {
             lock (Locker.obj)
             {
                 GetModelFromRepo(modelName).DeleteElement(
-                    GetElementFromRepo(modelName, elementId));
+                    GetElementFromRepo(modelName, name));
             }
         }
 
-        private IElement GetElementFromRepo(string modelName, int id) =>
-             GetModelFromRepo(modelName)
-             .Elements
-             .Where(elem => (elem.Id == id))
-             .First();
+        private IDeepElement GetElementFromRepo(string modelName, string name) =>
+            GetModelFromRepo(modelName)
+                .Elements
+                .First(elem => (elem.Name == name));
 
-        private IModel GetModelFromRepo(string name) =>
+        private IDeepModel GetModelFromRepo(string name) =>
             RepoContainer.CurrentRepo().Model(name);
 
 

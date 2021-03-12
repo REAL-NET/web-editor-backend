@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
-using Repo;
 using RepoAPI.Models;
-using System.Linq;
+using Repo.DeepMetamodel;
 
 namespace RepoAPI
 {
@@ -9,15 +8,18 @@ namespace RepoAPI
     {
         public AutomapperProfile()
         {
-            CreateMap<Repo.Metatype, Models.Metatype>().ReverseMap();
-            CreateMap<Repo.AttributeKind, Models.AttributeKind>().ReverseMap();
-            CreateMap<IAttribute, Attribute>().ReverseMap();
-            CreateMap<IElement, ElementInfo>();
-            CreateMap<IElement, Element>();
-            CreateMap<INode, Node>();
-            CreateMap<IEdge, Edge>();
-            CreateMap<IModel, Model>()
-                .ForMember(x => x.MetamodelName, x => x.MapFrom(y => y.Metamodel.Name));
+            CreateMap<IDeepContext, DeepContext>();
+            CreateMap<IDeepElement, ElementInfo>();
+            CreateMap<IDeepElement, Element>();
+            CreateMap<IDeepAttribute, Attribute>();
+            CreateMap<IDeepSlot, Slot>();
+            CreateMap<IDeepNode, Node>();
+            CreateMap<IDeepRelationship, Relationship>();
+            CreateMap<IDeepGeneralization, Generalization>();
+            CreateMap<IDeepAssociation, Association>();
+            CreateMap<IDeepInstanceOf, InstanceOf>();
+            CreateMap<IDeepModel, ModelInfo>();
+            CreateMap<IDeepModel, Model>();
         }
     }
 }

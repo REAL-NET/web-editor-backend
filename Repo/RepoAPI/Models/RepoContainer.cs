@@ -1,22 +1,22 @@
-﻿using Repo;
+﻿using Repo.DeepMetamodel;
 
 namespace RepoAPI.Models
 {
     public static class RepoContainer
     {
-        private static IRepo repo;
+        private static IDeepRepository repo;
 
         public static void Create()
         {
-            repo = RepoFactory.Create();
+            repo = DeepMetamodelRepoFactory.Create();
         }
 
         public static void Load(string path)
         {
-            repo = RepoFactory.Load(path);
+            //repo = DeepMetamodelRepoFactory.Load(path);
         }
 
-        public static IRepo CurrentRepo()
+        public static IDeepRepository CurrentRepo()
         {
             if (repo is null)
             {

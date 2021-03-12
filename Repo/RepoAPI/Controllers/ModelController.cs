@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using AutoMapper;
-
-using Repo;
+using Repo.DeepMetamodel;
 using RepoAPI.Models;
 
 namespace RepoAPI.Controllers
@@ -36,7 +34,7 @@ namespace RepoAPI.Controllers
             RepoContainer.CurrentRepo()
             .Models
             .ToList()
-            .ConvertAll<string>(model => model.Name);
+            .ConvertAll(model => model.Name);
 
         /// <summary>
         /// Returns model by its name.
@@ -53,11 +51,25 @@ namespace RepoAPI.Controllers
         /// <param name="metamodel">Metamodel name.</param>
         /// <param name="name">Name from new model. Should be unique.</param>
         [HttpPost("{metamodel}/{name}")]
-        public void CreateModel(string metamodel, string name)
+        public void CreateModelFromMetamodel(string metamodel, string name)
         {
             lock (Locker.obj)
             {
-                RepoContainer.CurrentRepo().CreateModel(name, metamodel);
+                var metamodelModel = RepoContainer.CurrentRepo().Model(metamodel);
+                RepoContainer.CurrentRepo().InstantiateModel(name, metamodelModel);
+            }
+        }
+        
+        /// <summary>
+        /// Creates new deep metamodel.
+        /// </summary>
+        /// <param name="name">Name from new model. Should be unique.</param>
+        [HttpPost("{name}")]
+        public void CreateDeepMetamodel(string name)
+        {
+            lock (Locker.obj)
+            {
+                RepoContainer.CurrentRepo().InstantiateDeepMetamodel(name);
             }
         }
 
@@ -76,20 +88,6 @@ namespace RepoAPI.Controllers
         }
 
         /// <summary>
-        /// Changes the model visability.
-        /// </summary>
-        /// <param name="modelName">Model name.</param>
-        /// <param name="isVisible">New visability value (true/fasle).</param>
-        [HttpPut("{modelName}/visability/{isVisible}")]
-        public void ChangeModelVisability(string modelName, bool isVisible)
-        {
-            lock (Locker.obj)
-            {
-                GetModelFromRepo(modelName).IsVisible = isVisible;
-            }
-        }
-
-        /// <summary>
         /// Removes model from repository.
         /// </summary>
         /// <param name="modelName">Model name.</param>
@@ -98,12 +96,12 @@ namespace RepoAPI.Controllers
         {
             lock (Locker.obj)
             {
-                IModel model = GetModelFromRepo(modelName);
+                IDeepModel model = GetModelFromRepo(modelName);
                 RepoContainer.CurrentRepo().DeleteModel(model);
             }
         }
 
-        private IModel GetModelFromRepo(string name) =>
+        private IDeepModel GetModelFromRepo(string name) =>
             RepoContainer.CurrentRepo().Model(name);
 
     }

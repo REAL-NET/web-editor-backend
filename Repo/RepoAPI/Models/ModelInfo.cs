@@ -1,7 +1,6 @@
-﻿using System;
 namespace RepoAPI.Models
 {
-    public class ElementInfo : DeepContext
+    public class ModelInfo
     {
         public string Name { get; set; }
     }
