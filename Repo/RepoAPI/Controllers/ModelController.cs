@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using AutoMapper;
@@ -57,6 +58,7 @@ namespace RepoAPI.Controllers
             {
                 var metamodelModel = RepoContainer.CurrentRepo().Model(metamodel);
                 RepoContainer.CurrentRepo().InstantiateModel(name, metamodelModel);
+                Console.Out.WriteLine("New model created");
             }
         }
         
@@ -70,6 +72,7 @@ namespace RepoAPI.Controllers
             lock (Locker.obj)
             {
                 RepoContainer.CurrentRepo().InstantiateDeepMetamodel(name);
+                Console.Out.WriteLine("New model created");
             }
         }
 

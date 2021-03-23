@@ -7,7 +7,7 @@ namespace RepoAPI.Models
     {
         public string Name { get; set; }
         public bool HasMetamodel { get; set; }
-        public ModelInfo MetamodelName { get; set; }
+        public ModelInfo Metamodel { get; set; }
         public IEnumerable<ElementInfo> Elements { get; set; }
         public IEnumerable<ElementInfo> Nodes { get; set; }
         public IEnumerable<ElementInfo> Relationships { get; set; }

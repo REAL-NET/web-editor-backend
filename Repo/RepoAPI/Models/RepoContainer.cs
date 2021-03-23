@@ -1,4 +1,5 @@
-﻿using Repo.DeepMetamodel;
+﻿using System;
+using Repo.DeepMetamodel;
 
 namespace RepoAPI.Models
 {
@@ -21,6 +22,7 @@ namespace RepoAPI.Models
             if (repo is null)
             {
                 Create();
+                Console.Out.Write("New repo created");
             }
             return repo;
         }
