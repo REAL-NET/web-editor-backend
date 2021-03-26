@@ -133,6 +133,24 @@ namespace RepoAPI.Controllers
                 return _mapper.Map<Attribute>(attribute);
             }
         }
+        
+        /// <summary>
+        /// Set attribute single or dual.
+        /// </summary>
+        /// <param name="modelName">Model name.</param>
+        /// <param name="elementName">Element name.</param>
+        /// <param name="attributeName">Attribute name.</param>
+        /// <param name="single">Is attribute single.</param>
+        [HttpPut("{modelName}/{elementName}/attribute/{attributeName}/{single}")]
+        public void AddAttributeSingle(string modelName, string elementName, string attributeName, bool single)
+        {
+            lock (Locker.obj)
+            {
+                var attributes = GetElementFromRepo(modelName, elementName).Attributes;
+                var attribute = attributes.First(it => it.Name == attributeName);
+                attribute.IsSingle = single;
+            }
+        }
 
         
         /// <summary>
