@@ -212,6 +212,27 @@ namespace RepoAPI.Controllers
 
         
         /// <summary>
+        /// Set slot value
+        /// </summary>
+        /// <param name="modelName">Model name.</param>
+        /// <param name="elementName">Element name.</param>
+        /// <param name="attributeName">Attribute name.</param>
+        /// <param name="newValue">Value element name.</param>
+        [HttpPut("{modelName}/{elementName}/attribute/{attributeName}/{value}")]
+        public ActionResult<Slot> SetSlotValue(string modelName, string elementName, string attributeName, string newValue)
+        {
+            lock (Locker.obj)
+            {
+                var valueElement = GetElementFromRepo(modelName, newValue);
+                var element = GetElementFromRepo(modelName, elementName);
+                var slot = element.Slots.First(it => it.Attribute.Name == attributeName);
+                slot.Value = valueElement;
+                return _mapper.Map<Slot>(slot);
+            }
+        }
+
+        
+        /// <summary>
         /// Removes the element from model.
         /// </summary>
         /// <param name="modelName">Model name.</param>
