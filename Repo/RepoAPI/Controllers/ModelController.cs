@@ -31,11 +31,13 @@ namespace RepoAPI.Controllers
         /// </summary>
         /// <returns>The sequence of models names.</returns>
         [HttpGet("all")]
-        public ActionResult<IEnumerable<string>> GetModels() =>
-            RepoContainer.CurrentRepo()
-            .Models
-            .ToList()
-            .ConvertAll(model => model.Name);
+        public ActionResult<IEnumerable<ModelInfo>> GetModels()
+        {
+            var result = RepoContainer.CurrentRepo()
+                .Models
+                .ToList();
+            return _mapper.Map<List<ModelInfo>>(result);
+        }
 
         /// <summary>
         /// Returns model by its name.
