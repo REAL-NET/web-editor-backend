@@ -48,16 +48,26 @@ namespace RepoAPI.Controllers
 
 
         /// <summary>
-        /// Returns the edge in model specified by its unique number key.
+        /// Returns the relationship in model specified by its name.
         /// </summary>
-        /// <returns>The edge.</returns>
+        /// <returns>The relationship.</returns>
         /// <param name="modelName">Model name.</param>
         /// <param name="name">Element name</param>
-        [HttpGet("{modelName}/{name}/asEdge")]
-        public ActionResult<Relationship> GetEdge(string modelName, string name) =>
+        [HttpGet("{modelName}/{name}/asRelationship")]
+        public ActionResult<Relationship> GetRelationship(string modelName, string name) =>
             _mapper.Map<Relationship>((IDeepRelationship) GetElementFromRepo(modelName, name));
 
-
+        
+        /// <summary>
+        /// Returns the association in model specified by its name.
+        /// </summary>
+        /// <returns>The association.</returns>
+        /// <param name="modelName">Model name.</param>
+        /// <param name="name">Element name</param>
+        [HttpGet("{modelName}/{name}/asAssociation")]
+        public ActionResult<Association> GetAssociation(string modelName, string name) =>
+            _mapper.Map<Association>((IDeepAssociation) GetElementFromRepo(modelName, name));
+        
         /// <summary>
         /// Creates new element in model by its parent.
         /// </summary>
