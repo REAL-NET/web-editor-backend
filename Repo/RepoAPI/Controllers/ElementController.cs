@@ -42,7 +42,7 @@ namespace RepoAPI.Controllers
         /// <returns>The node.</returns>
         /// <param name="modelName">Model name.</param>
         /// <param name="name">Element name</param>
-        [HttpGet("{modelName}/{name}/asNode")]
+        [HttpGet("node/{modelName}/{name}/asNode")]
         public ActionResult<Node> GetNode(string modelName, string name) =>
             _mapper.Map<Node>((INode)GetElementFromRepo(modelName, name));
 
@@ -53,7 +53,7 @@ namespace RepoAPI.Controllers
         /// <returns>The relationship.</returns>
         /// <param name="modelName">Model name.</param>
         /// <param name="name">Element name</param>
-        [HttpGet("{modelName}/{name}/asRelationship")]
+        [HttpGet("relationship/{modelName}/{name}/asRelationship")]
         public ActionResult<Relationship> GetRelationship(string modelName, string name) =>
             _mapper.Map<Relationship>((IDeepRelationship) GetElementFromRepo(modelName, name));
 
@@ -64,9 +64,78 @@ namespace RepoAPI.Controllers
         /// <returns>The association.</returns>
         /// <param name="modelName">Model name.</param>
         /// <param name="name">Element name</param>
-        [HttpGet("{modelName}/{name}/asAssociation")]
+        [HttpGet("association/{modelName}/{name}/")]
         public ActionResult<Association> GetAssociation(string modelName, string name) =>
             _mapper.Map<Association>((IDeepAssociation) GetElementFromRepo(modelName, name));
+        
+        
+        /// <summary>
+        /// Creates new element in model.
+        /// </summary>
+        /// <returns>The element.</returns>
+        /// <param name="modelName">Model name.</param>
+        /// <param name="name">New element name.</param>
+        /// <param name="level">New element level.</param>
+        /// <param name="potency">New element potency.</param>
+        [HttpPost("node/{modelName}/{name}/{level}/{potency}")]
+        public ActionResult<Node> CreateNode(string modelName, string name, int level, int potency)
+        {
+            lock (Locker.obj)
+            {
+                IDeepNode result = GetModelFromRepo(modelName).CreateNode(name, level, potency);
+                return _mapper.Map<Node>(result);
+            }
+        }
+        
+        /// <summary>
+        /// Creates new generalization in model by its parent.
+        /// </summary>
+        /// <returns>The element.</returns>
+        /// <param name="modelName">Model name.</param>
+        /// <param name="targetName">Target name.</param>
+        /// <param name="level">New element level.</param>
+        /// <param name="potency">New element potency.</param>
+        /// <param name="sourceName">Source name.</param>
+        [HttpPost("generalization/{modelName}/{sourceName}/{targetName}/{level}/{potency}")]
+        public ActionResult<Generalization> CreateGeneralization(string modelName, string sourceName, string targetName, int level, int potency)
+        {
+            lock (Locker.obj)
+            {
+                IDeepElement source = GetElementFromRepo(modelName, sourceName);
+                IDeepElement target = GetElementFromRepo(modelName, targetName);
+                var result = GetModelFromRepo(modelName).CreateGeneralization(source, target, level, potency);
+                return _mapper.Map<Generalization>(result);
+            }
+        }
+        
+        /// <summary>
+        /// Creates new relationship in model.
+        /// </summary>
+        /// <returns>The element.</returns>
+        /// <param name="modelName">Model name.</param>
+        /// <param name="name">Name.</param>
+        /// <param name="targetName">Target name.</param>
+        /// <param name="level">New element level.</param>
+        /// <param name="potency">New element potency.</param>
+        /// <param name="sourceName">Source name.</param>
+        /// <param name="minSource">Min level for source.</param>
+        /// <param name="maxSource">Max level for source.</param>
+        /// <param name="minTarget">Min level for target.</param>
+        /// <param name="maxTarget">Max level for target.</param>
+        [HttpPost("association/{modelName}/{name}/{sourceName}/{targetName}/{level}/{potency}/{minSource}/{maxSource}/{minTarget}/{maxTarget}")]
+        public ActionResult<Association> CreateAssociation(
+            string modelName, string name, string sourceName, string targetName, 
+            int level, int potency, int minSource, int maxSource, int minTarget, int maxTarget)
+        {
+            lock (Locker.obj)
+            {
+                IDeepElement source = GetElementFromRepo(modelName, sourceName);
+                IDeepElement target = GetElementFromRepo(modelName, targetName);
+                var result = GetModelFromRepo(modelName).CreateAssociation(source, target, name, level, potency, 
+                    minSource, maxSource, minTarget, maxTarget);
+                return _mapper.Map<Association>(result);
+            }
+        }
         
         /// <summary>
         /// Creates new element in model by its parent.
@@ -77,15 +146,46 @@ namespace RepoAPI.Controllers
         /// <param name="name">New element name.</param>
         /// <param name="level">New element level.</param>
         /// <param name="potency">New element potency.</param>
-        [HttpPost("{modelName}/{parentName}/{name}/{level}/{potency}")]
-        public ActionResult<Element> CreateElement(string modelName, string parentName, string name, int level, int potency)
+        [HttpPost("node/{modelName}/{parentName}/{name}/{level}/{potency}")]
+        public ActionResult<Node> InstantiateNode(string modelName, string parentName, string name, int level, int potency)
         {
             lock (Locker.obj)
             {
                 IDeepModel meta = GetModelFromRepo(modelName).Metamodel;
                 IDeepNode parentElement = (IDeepNode) GetElementFromRepo(meta.Name, parentName);
-                IDeepElement result = GetModelFromRepo(modelName).InstantiateNode(name, parentElement, level, potency);
-                return _mapper.Map<Element>(result);
+                IDeepNode result = GetModelFromRepo(modelName).InstantiateNode(name, parentElement, level, potency);
+                return _mapper.Map<Node>(result);
+            }
+        }
+
+        /// <summary>
+        /// Creates new relationship in model by its parent.
+        /// </summary>
+        /// <returns>The element.</returns>
+        /// <param name="modelName">Model name.</param>
+        /// <param name="parentName">Parent name.</param>
+        /// <param name="targetName">Target name.</param>
+        /// <param name="level">New element level.</param>
+        /// <param name="potency">New element potency.</param>
+        /// <param name="sourceName">Source name.</param>
+        /// <param name="minSource">Min level for source.</param>
+        /// <param name="maxSource">Max level for source.</param>
+        /// <param name="minTarget">Min level for target.</param>
+        /// <param name="maxTarget">Max level for target.</param>
+        [HttpPost("association/{modelName}/{parentName}/{sourceName}/{targetName}/{level}/{potency}/{minSource}/{maxSource}/{minTarget}/{maxTarget}")]
+        public ActionResult<Association> InstantiateAssociation(
+            string modelName, string parentName, string sourceName, string targetName, 
+            int level, int potency, int minSource, int maxSource, int minTarget, int maxTarget)
+        {
+            lock (Locker.obj)
+            {
+                IDeepModel meta = GetModelFromRepo(modelName).Metamodel;
+                IDeepAssociation parentElement = (IDeepAssociation) GetElementFromRepo(meta.Name, parentName);
+                IDeepElement source = (IDeepElement) GetElementFromRepo(meta.Name, sourceName);
+                IDeepElement target = (IDeepElement) GetElementFromRepo(meta.Name, targetName);
+                var result = GetModelFromRepo(modelName).InstantiateAssociation(source, target, parentElement, level, potency, 
+                    minSource, maxSource, minTarget, maxTarget);
+                return _mapper.Map<Association>(result);
             }
         }
 
