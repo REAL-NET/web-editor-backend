@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using AutoMapper;
-using Repo;
 using Repo.DeepMetamodel;
 using RepoAPI.Models;
+using Attribute = RepoAPI.Models.Attribute;
 
 namespace RepoAPI.Controllers
 {
@@ -42,9 +43,9 @@ namespace RepoAPI.Controllers
         /// <returns>The node.</returns>
         /// <param name="modelName">Model name.</param>
         /// <param name="name">Element name</param>
-        [HttpGet("node/{modelName}/{name}/asNode")]
+        [HttpGet("node/{modelName}/{name}")]
         public ActionResult<Node> GetNode(string modelName, string name) =>
-            _mapper.Map<Node>((INode)GetElementFromRepo(modelName, name));
+            _mapper.Map<Node>(GetElementFromRepo(modelName, name));
 
 
         /// <summary>
@@ -53,7 +54,7 @@ namespace RepoAPI.Controllers
         /// <returns>The relationship.</returns>
         /// <param name="modelName">Model name.</param>
         /// <param name="name">Element name</param>
-        [HttpGet("relationship/{modelName}/{name}/asRelationship")]
+        [HttpGet("relationship/{modelName}/{name}")]
         public ActionResult<Relationship> GetRelationship(string modelName, string name) =>
             _mapper.Map<Relationship>((IDeepRelationship) GetElementFromRepo(modelName, name));
 
@@ -83,6 +84,7 @@ namespace RepoAPI.Controllers
             lock (Locker.obj)
             {
                 IDeepNode result = GetModelFromRepo(modelName).CreateNode(name, level, potency);
+                Console.Out.WriteLine(result);
                 return _mapper.Map<Node>(result);
             }
         }
