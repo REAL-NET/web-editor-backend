@@ -175,7 +175,7 @@ namespace RepoAPI.Controllers
         /// <param name="maxSource">Max level for source.</param>
         /// <param name="minTarget">Min level for target.</param>
         /// <param name="maxTarget">Max level for target.</param>
-        [HttpPost("association/{modelName}/{name}/{parentName}//{sourceName}/{targetName}/{level}/{potency}/{minSource}/{maxSource}/{minTarget}/{maxTarget}")]
+        [HttpPost("association/{modelName}/{name}/{parentName}/{sourceName}/{targetName}/{level}/{potency}/{minSource}/{maxSource}/{minTarget}/{maxTarget}")]
         public ActionResult<Association> InstantiateAssociation(
             string modelName, string name, string parentName, string sourceName, string targetName, 
             int level, int potency, int minSource, int maxSource, int minTarget, int maxTarget)
