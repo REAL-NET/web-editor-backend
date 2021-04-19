@@ -48,6 +48,24 @@ namespace RepoAPI.Controllers
         public ActionResult<Model> Model(string modelName) =>
             _mapper.Map<Model>(RepoContainer.CurrentRepo().Model(modelName));
 
+
+        /// <summary>
+        /// Return palette nodes for model.
+        /// </summary>
+        /// <param name="modelName">Model name.</param>
+        [HttpGet("{modelName}/metanodes")]
+        public ActionResult<IEnumerable<ElementInfo>> GetModelMetaNodes(string modelName)
+        {
+            IEnumerable<IDeepNode> result = new LinkedList<IDeepNode>();
+            var currentModel = GetModelFromRepo(modelName).Metamodel;
+            while (currentModel.Name != "LanguageMetamodel")
+            {
+                result = result.Concat(currentModel.Nodes);
+                currentModel = currentModel.Metamodel;
+            }
+            return _mapper.Map<List<ElementInfo>>(result);
+        }
+
         /// <summary>
         /// Creates new model from metamodel.
         /// </summary>
