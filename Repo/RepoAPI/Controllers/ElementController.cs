@@ -36,6 +36,23 @@ namespace RepoAPI.Controllers
         [HttpGet("{modelName}/{name}")]
         public ActionResult<Element> GetElement(string modelName, string name) =>
             _mapper.Map<Element>(GetElementFromRepo(modelName, name));
+        
+        /// <summary>
+        /// Sets element name.
+        /// </summary>
+        /// <param name="modelName">Model name.</param>
+        /// <param name="oldName">Element name.</param>
+        /// <param name="newName">New element name.</param>
+        [HttpPut("{modelName}/{oldName}/name/{newName}")]
+        public ActionResult<ElementInfo> SetElementName(string modelName, string oldName, string newName)
+        {
+            lock (Locker.obj)
+            {
+                var elem = GetElementFromRepo(modelName, oldName);
+                elem.Name = newName;
+                return _mapper.Map<ElementInfo>(elem);
+            }
+        }
 
         /// <summary>
         /// Returns the node in model specified by its unique number key.
