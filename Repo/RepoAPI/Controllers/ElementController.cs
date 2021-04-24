@@ -111,18 +111,20 @@ namespace RepoAPI.Controllers
         /// </summary>
         /// <returns>The element.</returns>
         /// <param name="modelName">Model name.</param>
+        /// <param name="name">New element name.</param>
+        /// <param name="sourceName">Source name.</param>
         /// <param name="targetName">Target name.</param>
         /// <param name="level">New element level.</param>
         /// <param name="potency">New element potency.</param>
-        /// <param name="sourceName">Source name.</param>
-        [HttpPost("generalization/{modelName}/{sourceName}/{targetName}/{level}/{potency}")]
-        public ActionResult<Generalization> CreateGeneralization(string modelName, string sourceName, string targetName, int level, int potency)
+        [HttpPost("generalization/{modelName}/{name}/{sourceName}/{targetName}/{level}/{potency}")]
+        public ActionResult<Generalization> CreateGeneralization(string modelName, string name, 
+            string sourceName, string targetName, int level, int potency)
         {
             lock (Locker.obj)
             {
                 IDeepElement source = GetElementFromRepo(modelName, sourceName);
                 IDeepElement target = GetElementFromRepo(modelName, targetName);
-                var result = GetModelFromRepo(modelName).CreateGeneralization(source, target, level, potency);
+                var result = GetModelFromRepo(modelName).CreateGeneralization(source, target, name, level, potency);
                 return _mapper.Map<Generalization>(result);
             }
         }
