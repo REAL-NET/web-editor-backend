@@ -65,6 +65,26 @@ namespace RepoAPI.Controllers
             }
             return _mapper.Map<List<ElementInfo>>(result);
         }
+        
+        /// <summary>
+        /// Return palette edges for model.
+        /// </summary>
+        /// <param name="modelName">Model name.</param>
+        [HttpGet("{modelName}/metaedges")]
+        public ActionResult<IEnumerable<ElementInfo>> GetModelMetaEdges(string modelName)
+        {
+            IEnumerable<IDeepAssociation> result = new LinkedList<IDeepAssociation>();
+            var currentModel = GetModelFromRepo(modelName).Metamodel;
+            while (currentModel.Name != "LanguageMetamodel")
+            {
+                result = result.Concat(currentModel.Relationships
+                    .Where(it => it is IDeepAssociation)
+                    .OfType<IDeepAssociation>()
+                );
+                currentModel = currentModel.Metamodel;
+            }
+            return _mapper.Map<List<ElementInfo>>(result);
+        }
 
         /// <summary>
         /// Creates new model from metamodel.
