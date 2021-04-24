@@ -17,9 +17,7 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.0.0" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CheckingConstraints\CheckingConstraints.csproj" />
     <ProjectReference Include="..\Repo\Repo.Source\Repo.fsproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Models\" />
   </ItemGroup>
 </Project>
