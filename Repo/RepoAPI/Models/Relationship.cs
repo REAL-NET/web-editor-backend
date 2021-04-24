@@ -4,5 +4,7 @@ namespace RepoAPI.Models
     {
         public ElementInfo Source { get; set; }
         public ElementInfo Target { get; set; }
+
+        public string Type { get; set; }
     }
 }
