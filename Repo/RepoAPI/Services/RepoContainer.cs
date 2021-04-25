@@ -1,5 +1,6 @@
 ﻿using System;
 using Repo.DeepMetamodel;
+using Repo.DeepMetamodels;
 
 namespace RepoAPI.Models
 {
@@ -13,6 +14,10 @@ namespace RepoAPI.Models
             var metamodel = repo.InstantiateDeepMetamodel("TestMetamodel");
             var model1 = repo.InstantiateModel("TestModel1", metamodel);
             repo.InstantiateModel("TestModel2", model1);
+            IModelBuilder airSimMetamodelBuilder = new AirSimMetamodelBuilder();
+            airSimMetamodelBuilder.Build(repo);
+            var airSimMetamodel = repo.Model("AirSimMetamodel");
+            repo.InstantiateModel("AirSimModel", airSimMetamodel);
         }
 
         public static void Load(string path)
