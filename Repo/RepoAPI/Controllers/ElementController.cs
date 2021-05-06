@@ -95,7 +95,7 @@ namespace RepoAPI.Controllers
         /// <param name="name">New element name.</param>
         /// <param name="level">New element level.</param>
         /// <param name="potency">New element potency.</param>
-        [HttpPost("node/{modelName}/{name}/{level}/{potency}")]
+        [HttpPost("node/create/{modelName}/{name}/{level}/{potency}")]
         public ActionResult<Node> CreateNode(string modelName, string name, int level, int potency)
         {
             lock (Locker.obj)
@@ -143,7 +143,7 @@ namespace RepoAPI.Controllers
         /// <param name="maxSource">Max level for source.</param>
         /// <param name="minTarget">Min level for target.</param>
         /// <param name="maxTarget">Max level for target.</param>
-        [HttpPost("association/{modelName}/{name}/{sourceName}/{targetName}/{level}/{potency}/{minSource}/{maxSource}/{minTarget}/{maxTarget}")]
+        [HttpPost("association/create/{modelName}/{name}/{sourceName}/{targetName}/{level}/{potency}/{minSource}/{maxSource}/{minTarget}/{maxTarget}")]
         public ActionResult<Association> CreateAssociation(
             string modelName, string name, string sourceName, string targetName, 
             int level, int potency, int minSource, int maxSource, int minTarget, int maxTarget)
@@ -166,7 +166,7 @@ namespace RepoAPI.Controllers
         /// <param name="parentModel">Parent Model.</param>
         /// <param name="parentName">Parent name.</param>
         /// <param name="name">New element name.</param>
-        [HttpPost("node/{modelName}/{parentModel}/{parentName}/{name}")]
+        [HttpPost("node/instantiate/{modelName}/{parentModel}/{parentName}/{name}")]
         public ActionResult<Node> InstantiateNode(string modelName, string parentModel, string parentName, string name)
         {
             lock (Locker.obj)
@@ -187,7 +187,7 @@ namespace RepoAPI.Controllers
         /// <param name="parentName">Parent name.</param>
         /// <param name="targetName">Target name.</param>
         /// <param name="sourceName">Source name.</param>
-        [HttpPost("association/{modelName}/{name}/{parentModel}/{parentName}/{sourceName}/{targetName}")]
+        [HttpPost("association/instantiate/{modelName}/{name}/{parentModel}/{parentName}/{sourceName}/{targetName}")]
         public ActionResult<Association> InstantiateAssociation(
             string modelName, string name, string parentModel, string parentName, string sourceName, string targetName)
         {
