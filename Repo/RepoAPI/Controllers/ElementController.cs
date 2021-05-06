@@ -166,15 +166,13 @@ namespace RepoAPI.Controllers
         /// <param name="parentModel">Parent Model.</param>
         /// <param name="parentName">Parent name.</param>
         /// <param name="name">New element name.</param>
-        /// <param name="level">New element level.</param>
-        /// <param name="potency">New element potency.</param>
-        [HttpPost("node/{modelName}/{parentModel}/{parentName}/{name}/{level}/{potency}")]
-        public ActionResult<Node> InstantiateNode(string modelName, string parentModel, string parentName, string name, int level, int potency)
+        [HttpPost("node/{modelName}/{parentModel}/{parentName}/{name}")]
+        public ActionResult<Node> InstantiateNode(string modelName, string parentModel, string parentName, string name)
         {
             lock (Locker.obj)
             {
                 IDeepNode parentElement = (IDeepNode) GetElementFromRepo(parentModel, parentName);
-                IDeepNode result = GetModelFromRepo(modelName).InstantiateNode(name, parentElement, level, potency);
+                IDeepNode result = GetModelFromRepo(modelName).InstantiateNode(name, parentElement);
                 return _mapper.Map<Node>(result);
             }
         }
@@ -188,25 +186,17 @@ namespace RepoAPI.Controllers
         /// <param name="parentModel">Parent model.</param>
         /// <param name="parentName">Parent name.</param>
         /// <param name="targetName">Target name.</param>
-        /// <param name="level">New element level.</param>
-        /// <param name="potency">New element potency.</param>
         /// <param name="sourceName">Source name.</param>
-        /// <param name="minSource">Min level for source.</param>
-        /// <param name="maxSource">Max level for source.</param>
-        /// <param name="minTarget">Min level for target.</param>
-        /// <param name="maxTarget">Max level for target.</param>
-        [HttpPost("association/{modelName}/{name}/{parentModel}/{parentName}/{sourceName}/{targetName}/{level}/{potency}/{minSource}/{maxSource}/{minTarget}/{maxTarget}")]
+        [HttpPost("association/{modelName}/{name}/{parentModel}/{parentName}/{sourceName}/{targetName}")]
         public ActionResult<Association> InstantiateAssociation(
-            string modelName, string name, string parentModel, string parentName, string sourceName, string targetName, 
-            int level, int potency, int minSource, int maxSource, int minTarget, int maxTarget)
+            string modelName, string name, string parentModel, string parentName, string sourceName, string targetName)
         {
             lock (Locker.obj)
             {
                 IDeepAssociation parentElement = (IDeepAssociation) GetElementFromRepo(parentModel, parentName);
                 IDeepElement source = (IDeepElement) GetElementFromRepo(modelName, sourceName);
                 IDeepElement target = (IDeepElement) GetElementFromRepo(modelName, targetName);
-                var result = GetModelFromRepo(modelName).InstantiateAssociation(source, target, name, parentElement, level, potency, 
-                    minSource, maxSource, minTarget, maxTarget);
+                var result = GetModelFromRepo(modelName).InstantiateAssociation(source, target, name, parentElement);
                 return _mapper.Map<Association>(result);
             }
         }
