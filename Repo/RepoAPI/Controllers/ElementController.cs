@@ -53,6 +53,42 @@ namespace RepoAPI.Controllers
                 return _mapper.Map<ElementInfo>(elem);
             }
         }
+        
+        /// <summary>
+        /// Sets element level.
+        /// </summary>
+        /// <param name="modelName">Model name.</param>
+        /// <param name="name">Element name.</param>
+        /// <param name="level">New element level</param>
+        /// <returns></returns>
+        [HttpPut("{modelName}/{name}/level/{level}")]
+        public ActionResult<ElementInfo> SetElementLevel(string modelName, string name, int level)
+        {
+            lock (Locker.obj)
+            {
+                var elem = GetElementFromRepo(modelName, name);
+                elem.Level = level;
+                return _mapper.Map<ElementInfo>(elem);
+            }
+        }
+        
+        /// <summary>
+        /// Sets element potency.
+        /// </summary>
+        /// <param name="modelName">Model name.</param>
+        /// <param name="name">Element name.</param>
+        /// <param name="potency">New element potency</param>
+        /// <returns></returns>
+        [HttpPut("{modelName}/{name}/potency/{potency}")]
+        public ActionResult<ElementInfo> SetElementPotency(string modelName, string name, int potency)
+        {
+            lock (Locker.obj)
+            {
+                var elem = GetElementFromRepo(modelName, name);
+                elem.Potency = potency;
+                return _mapper.Map<ElementInfo>(elem);
+            }
+        }
 
         /// <summary>
         /// Returns the node in model specified by its unique number key.
