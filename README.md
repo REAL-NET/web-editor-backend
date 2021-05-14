@@ -1,5 +1,7 @@
 # Бекенд веб-редактора REAL.NET
 
+[![CircleCI](https://circleci.com/gh/REAL-NET/web-editor-backend.svg?style=svg)](https://circleci.com/gh/REAL-NET/web-editor-backend)
+
 ### Сервисы
 
 #### Gateway
