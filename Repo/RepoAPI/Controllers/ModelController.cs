@@ -63,6 +63,8 @@ namespace RepoAPI.Controllers
                 result = result.Concat(currentModel.Nodes);
                 currentModel = currentModel.Metamodel;
             }
+
+            result = result.Where(it => it.Potency != 0);
             return _mapper.Map<List<ElementInfo>>(result);
         }
         
@@ -83,6 +85,7 @@ namespace RepoAPI.Controllers
                 );
                 currentModel = currentModel.Metamodel;
             }
+            result = result.Where(it => it.Potency != 0);
             return _mapper.Map<List<ElementInfo>>(result);
         }
 
