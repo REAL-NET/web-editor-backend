@@ -354,7 +354,7 @@ namespace RepoAPI.Controllers
         /// <param name="value">Value element name.</param>
         /// <param name="level">New element level.</param>
         /// <param name="potency">New element potency.</param>
-        [HttpPost("{modelName}/{elementName}/attribute/{attributeName}/{value}/{level}/{potency}")]
+        [HttpPost("{modelName}/{elementName}/slot/{attributeName}/{value}/{level}/{potency}")]
         public ActionResult<Slot> AddSlot(string modelName, string elementName,
             string attributeName, string value, int level, int potency)
         {
@@ -376,7 +376,7 @@ namespace RepoAPI.Controllers
         /// <param name="elementName">Element name.</param>
         /// <param name="attributeName">Attribute name.</param>
         /// <param name="newValue">Value element name.</param>
-        [HttpPut("{modelName}/{elementName}/attribute/{attributeName}/{value}")]
+        [HttpPut("{modelName}/{elementName}/slot/{attributeName}/{value}")]
         public ActionResult<Slot> SetSlotValue(string modelName, string elementName, string attributeName, string newValue)
         {
             lock (Locker.obj)
