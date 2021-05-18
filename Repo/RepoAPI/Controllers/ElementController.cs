@@ -395,7 +395,7 @@ namespace RepoAPI.Controllers
         /// <param name="modelName">Model name.</param>
         /// <param name="elementName">Element name.</param>
         /// <param name="attributeName">Attribute name.</param>
-        [HttpGet("{modelName}/{elementName}/slot/{attributeName}/values}")]
+        [HttpGet("{modelName}/{elementName}/slot/{attributeName}/values")]
         public ActionResult<IEnumerable<ElementInfo>> GetValuesForAttribute(
             string modelName, string elementName, string attributeName)
         {
