@@ -242,7 +242,7 @@ namespace RepoAPI.Controllers
         /// </summary>
         /// <param name="modelName">Model name.</param>
         /// <param name="elementName">Element name.</param>
-        [HttpGet("{modelName}/{name}/attributes")]
+        [HttpGet("{modelName}/{elementName}/attributes")]
         public ActionResult<IEnumerable<Attribute>> GetAttributes(string modelName, string elementName)
         {
             lock (Locker.obj)
@@ -258,7 +258,7 @@ namespace RepoAPI.Controllers
         /// <param name="modelName">Model name.</param>
         /// <param name="elementName">Element name.</param>
         /// <param name="attributeName">Attribute name.</param>
-        [HttpGet("{modelName}/{name}/attribute/{attributeName}")]
+        [HttpGet("{modelName}/{elementName}/attribute/{attributeName}")]
         public ActionResult<Attribute> GetAttribute(string modelName, string elementName, string attributeName)
         {
             lock (Locker.obj)
@@ -316,7 +316,7 @@ namespace RepoAPI.Controllers
         /// </summary>
         /// <param name="modelName">Model name.</param>
         /// <param name="elementName">Element name.</param>
-        [HttpGet("{modelName}/{name}/slots")]
+        [HttpGet("{modelName}/{elementName}/slots")]
         public ActionResult<IEnumerable<Slot>> GetSlots(string modelName, string elementName)
         {
             lock (Locker.obj)
@@ -333,7 +333,7 @@ namespace RepoAPI.Controllers
         /// <param name="modelName">Model name.</param>
         /// <param name="elementName">Element name.</param>
         /// <param name="attributeName">Attribute name.</param>
-        [HttpGet("{modelName}/{name}/slot/{attributeName}")]
+        [HttpGet("{modelName}/{elementName}/slot/{attributeName}")]
         public ActionResult<Slot> GetSlot(string modelName, string elementName, string attributeName)
         {
             lock (Locker.obj)
