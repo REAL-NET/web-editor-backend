@@ -389,7 +389,26 @@ namespace RepoAPI.Controllers
             }
         }
 
-        
+        /// <summary>
+        /// Return possible value elements for given attribute.
+        /// </summary>
+        /// <param name="modelName">Model name.</param>
+        /// <param name="elementName">Element name.</param>
+        /// <param name="attributeName">Attribute name.</param>
+        [HttpGet("{modelName}/{elementName}/slot/{attributeName}/values}")]
+        public ActionResult<IEnumerable<ElementInfo>> GetValuesForAttribute(
+            string modelName, string elementName, string attributeName)
+        {
+            lock (Locker.obj)
+            {
+                var element = GetElementFromRepo(modelName, elementName);
+                var attribute = element.Attributes.First(it => it.Name == attributeName);
+                var result = element.GetValuesForAttribute(attribute);
+                return _mapper.Map<List<ElementInfo>>(result);
+            }
+        }
+
+
         /// <summary>
         /// Removes the element from model.
         /// </summary>
