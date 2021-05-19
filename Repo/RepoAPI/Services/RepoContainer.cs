@@ -14,8 +14,10 @@ namespace RepoAPI.Models
             var metamodel = repo.InstantiateDeepMetamodel("TestMetamodel");
             var model1 = repo.InstantiateModel("TestModel1", metamodel);
             repo.InstantiateModel("TestModel2", model1);
-            IModelBuilder airSimMetamodelBuilder = new AirSimMetamodelBuilder();
+            IDeepModelBuilder airSimMetamodelBuilder = new AirSimMetamodelBuilder();
             airSimMetamodelBuilder.Build(repo);
+            IDeepModelBuilder atkinsonModelBuilder = new AtkinsonModelBuilder();
+            atkinsonModelBuilder.Build(repo);
             var airSimMetamodel = repo.Model("AirSimMetamodel");
             repo.InstantiateModel("AirSimModel", airSimMetamodel);
         }
