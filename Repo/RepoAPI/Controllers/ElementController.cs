@@ -276,16 +276,17 @@ namespace RepoAPI.Controllers
         /// <param name="modelName">Model name.</param>
         /// <param name="name">Element name.</param>
         /// <param name="attributeName">Attribute name.</param>
+        /// <param name="typeModel">Type model.</param>
         /// <param name="type">Type element name.</param>
         /// <param name="level">New element level.</param>
         /// <param name="potency">New element potency.</param>
-        [HttpPost("{modelName}/{name}/attribute/{attributeName}/{type}/{level}/{potency}")]
+        [HttpPost("{modelName}/{name}/attribute/{attributeName}/{typeModel}/{type}/{level}/{potency}")]
         public ActionResult<Attribute> AddAttribute(string modelName, string name,
-            string attributeName, string type, int level, int potency)
+            string attributeName, string typeModel, string type, int level, int potency)
         {
             lock (Locker.obj)
             {
-                var typeElement = GetElementFromRepo(modelName, type);
+                var typeElement = GetElementFromRepo(typeModel, type);
                 var attribute = GetElementFromRepo(modelName, name)
                     .AddAttribute(attributeName, typeElement, level, potency);
                 return _mapper.Map<Attribute>(attribute);
