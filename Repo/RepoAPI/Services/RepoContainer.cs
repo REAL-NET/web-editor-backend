@@ -18,6 +18,8 @@ namespace RepoAPI.Models
             airSimMetamodelBuilder.Build(repo);
             IDeepModelBuilder atkinsonModelBuilder = new AtkinsonModelBuilder();
             atkinsonModelBuilder.Build(repo);
+            IDeepModelBuilder robots = new RobotsSubroutineModelsBuilder();
+            robots.Build(repo);
             var airSimMetamodel = repo.Model("AirSimMetamodel");
             repo.InstantiateModel("AirSimModel", airSimMetamodel);
         }
