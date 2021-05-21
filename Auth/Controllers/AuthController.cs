@@ -1,6 +1,13 @@
-﻿using Auth.Models;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Auth.Data;
+using Auth.Models;
 using Auth.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace Auth.Controllers
 {
@@ -15,12 +22,6 @@ namespace Auth.Controllers
             _userService = userService;
         }
 
-        
-        /// <summary>
-        /// Authenticates user by login and password.
-        /// </summary>
-        /// <param name="authInfo">Login and password</param>
-        /// <returns>Login and JWT token</returns>
         [HttpPost("")]
         public ActionResult<TokenInfo> AuthUser([FromBody] AuthInfo authInfo)
         {
@@ -33,23 +34,12 @@ namespace Auth.Controllers
             return Ok(tokenInfo);
         }
 
-        /// <summary>
-        /// Checks token for user.
-        /// </summary>
-        /// <param name="tokenInfo">User and token</param>
-        /// <returns>if token is valid</returns>
         [HttpGet("validate")]
         public ActionResult<bool> Validate([FromBody] TokenInfo tokenInfo)
         {
             return Ok(_userService.ValidateToken(tokenInfo.Login, tokenInfo.Token));
         }
 
-        /// <summary>
-        /// Register new user by login, password and name.
-        /// Id is not to be specified.
-        /// </summary>
-        /// <param name="userInfo">Login, password and name</param>
-        /// <returns>if user is successfully registered</returns>
         [HttpPost("register")]
         public ActionResult<bool> RegisterUser([FromBody] UserInfo userInfo)
         {
