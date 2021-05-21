@@ -1,7 +1,7 @@
 namespace RepoAPI.Models
 {
     public class SerializationRequest
-    {
-        public string FileName;
+    { 
+        public string Filename { get; set; }
     }
 }
