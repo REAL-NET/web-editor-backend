@@ -26,7 +26,7 @@ namespace RepoAPI.Controllers
         {
             lock (Locker.obj)
             {
-                RepoContainer.CurrentRepo().Save("serialized/" + request.Filename);
+                RepoContainer.CurrentRepo().Save(request.FileName);
             }
         }
         
@@ -38,7 +38,7 @@ namespace RepoAPI.Controllers
         {
             lock (Locker.obj)
             {
-                RepoContainer.Load("serialized/" + request.Filename);
+                RepoContainer.Load(request.FileName);
             }
         }
     }

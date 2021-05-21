@@ -104,28 +104,6 @@ jobs:
     steps:
       - publish-service:
           image_name: "repo"
-  build-storage:
-    executor: docker-publisher
-    steps: 
-      - build-service:
-          image_name: "storage"
-          dir: "Storage/"
-  publish-storage:
-    executor: docker-publisher
-    steps:
-      - publish-service:
-          image_name: "storage"
-  build-generator:
-    executor: docker-publisher
-    steps: 
-      - build-service:
-          image_name: "generator"
-          dir: "Generator/"
-  publish-generator:
-    executor: docker-publisher
-    steps:
-      - publish-service:
-          image_name: "generator"
   build-test:
     executor: docker-publisher
     steps: 
@@ -153,14 +131,6 @@ workflows:
       - publish-repo: 
           requires: 
             - build-repo
-      - build-storage
-      - publish-storage: 
-          requires: 
-            - build-storage
-      - build-generator
-      - publish-generator: 
-          requires: 
-            - build-generator
       - build-test
       - publish-test: 
           requires: 
