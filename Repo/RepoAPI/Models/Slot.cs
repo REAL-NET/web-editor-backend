@@ -4,5 +4,7 @@ namespace RepoAPI.Models
     {
         public Attribute Attribute { get; set; }
         public ElementInfo Value { get; set; }
+        public bool IsSimple { get; set; }
+        public string SimpleValue { get; set; }
     }
 }

@@ -294,6 +294,25 @@ namespace RepoAPI.Controllers
         }
         
         /// <summary>
+        /// Adds an simple untyped string attribute into element.
+        /// </summary>
+        /// <param name="modelName">Model name.</param>
+        /// <param name="name">Element name.</param>
+        /// <param name="attributeName">Attribute name.</param>
+        /// <param name="level">New element level.</param>
+        /// <param name="potency">New element potency.</param>
+        [HttpPost("{modelName}/{name}/attribute/{attributeName}/{level}/{potency}")]
+        public ActionResult<Attribute> AddSimpleAttribute(string modelName, string name, 
+            string attributeName, int level, int potency)
+        {
+            lock (Locker.obj)
+            {
+                var attribute = GetElementFromRepo(modelName, name).AddSimpleAttribute(attributeName, level, potency);
+                return _mapper.Map<Attribute>(attribute);
+            }
+        }
+        
+        /// <summary>
         /// Set attribute single or dual.
         /// </summary>
         /// <param name="modelName">Model name.</param>
@@ -344,48 +363,91 @@ namespace RepoAPI.Controllers
                 return _mapper.Map<Slot>(attribute);
             }
         }
-        
-        
+
+
         /// <summary>
         /// Adds the slot into element.
         /// </summary>
         /// <param name="modelName">Model name.</param>
         /// <param name="elementName">Element name.</param>
         /// <param name="attributeName">Attribute name.</param>
+        /// <param name="valueModel">Value element model.</param>
         /// <param name="value">Value element name.</param>
         /// <param name="level">New element level.</param>
         /// <param name="potency">New element potency.</param>
-        [HttpPost("{modelName}/{elementName}/slot/{attributeName}/{value}/{level}/{potency}")]
+        [HttpPost("{modelName}/{elementName}/slot/{attributeName}/{valueModel}/{value}/{level}/{potency}")]
         public ActionResult<Slot> AddSlot(string modelName, string elementName,
-            string attributeName, string value, int level, int potency)
+            string attributeName, string valueModel, string value, int level, int potency)
         {
             lock (Locker.obj)
             {
-                var valueElement = GetElementFromRepo(modelName, value);
+                var valueElement = GetElementFromRepo(valueModel, value);
                 var element = GetElementFromRepo(modelName, elementName);
                 var attribute = element.Attributes.First(it => it.Name == attributeName);
                 var slot = element.AddSlot(attribute, valueElement, level, potency);
                 return _mapper.Map<Slot>(slot);
             }
         }
-
         
+        /// <summary>
+        /// Adds a simple slot for simple attribute with string value into element.
+        /// </summary>
+        /// <param name="modelName">Model name.</param>
+        /// <param name="elementName">Element name.</param>
+        /// <param name="attributeName">Attribute name.</param>
+        /// <param name="value">String value.</param>
+        /// <param name="level">New element level.</param>
+        /// <param name="potency">New element potency.</param>
+        [HttpPost("{modelName}/{elementName}/slot/{attributeName}/{value}/{level}/{potency}")]
+        public ActionResult<Slot> AddSimpleSlot(string modelName, string elementName,
+            string attributeName, string value, int level, int potency)
+        {
+            lock (Locker.obj)
+            {
+                var element = GetElementFromRepo(modelName, elementName);
+                var attribute = element.Attributes.First(it => it.Name == attributeName);
+                var slot = element.AddSimpleSlot(attribute, value, level, potency);
+                return _mapper.Map<Slot>(slot);
+            }
+        }
+
+
         /// <summary>
         /// Set slot value
         /// </summary>
         /// <param name="modelName">Model name.</param>
         /// <param name="elementName">Element name.</param>
         /// <param name="attributeName">Attribute name.</param>
+        /// <param name="valueModel">Value element model.</param>
         /// <param name="newValue">Value element name.</param>
-        [HttpPut("{modelName}/{elementName}/slot/{attributeName}/{value}")]
-        public ActionResult<Slot> SetSlotValue(string modelName, string elementName, string attributeName, string newValue)
+        [HttpPut("{modelName}/{elementName}/slot/{attributeName}/{valueModel}/{newValue}")]
+        public ActionResult<Slot> SetSlotValue(string modelName, string elementName, string attributeName, string valueModel, string newValue)
         {
             lock (Locker.obj)
             {
-                var valueElement = GetElementFromRepo(modelName, newValue);
+                var valueElement = GetElementFromRepo(valueModel, newValue);
                 var element = GetElementFromRepo(modelName, elementName);
                 var slot = element.Slots.First(it => it.Attribute.Name == attributeName);
                 slot.Value = valueElement;
+                return _mapper.Map<Slot>(slot);
+            }
+        }
+        
+        /// <summary>
+        /// Set simple slot value
+        /// </summary>
+        /// <param name="modelName">Model name.</param>
+        /// <param name="elementName">Element name.</param>
+        /// <param name="attributeName">Attribute name.</param>
+        /// <param name="newValue">Value element name.</param>
+        [HttpPut("{modelName}/{elementName}/slot/{attributeName}/{newValue}")]
+        public ActionResult<Slot> SetSimpleSlotValue(string modelName, string elementName, string attributeName, string newValue)
+        {
+            lock (Locker.obj)
+            {
+                var element = GetElementFromRepo(modelName, elementName);
+                var slot = element.Slots.First(it => it.Attribute.Name == attributeName);
+                slot.SimpleValue = newValue;
                 return _mapper.Map<Slot>(slot);
             }
         }
