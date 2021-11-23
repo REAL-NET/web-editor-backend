@@ -22,6 +22,8 @@ namespace RepoAPI.Models
             robots.Build(repo);
             IDeepModelBuilder qRealRobots = new RobotsQRealModelsBuilder();
             qRealRobots.Build(repo);
+            IDeepModelBuilder query = new QueryModelBuilder();
+            query.Build(repo);
             var airSimMetamodel = repo.Model("AirSimMetamodel");
             repo.InstantiateModel("AirSimModel", airSimMetamodel);
         }
