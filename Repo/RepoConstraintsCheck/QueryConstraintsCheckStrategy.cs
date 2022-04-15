@@ -8,88 +8,72 @@ namespace RepoConstraintsCheck
     public class QueryConstraintsCheckStrategy : IConstraintsCheckStrategy
     {
         private IModel model;
-        private INode[] nodes;
         public QueryConstraintsCheckStrategy(IModel model)
         {
             this.model = model;
-            nodes = model.Nodes.ToArray();
         }
 
         public bool Check(IModel model)
         {
-            return CheckDataTypes() && isAcyclic();
+            return CheckPositionalOperatorsHaveReaders() && CheckTupleOperatorsHaveNoReaders();
         }
 
-        private bool CheckDataTypes()
+        private bool CheckPositionalOperatorsHaveReaders()
         {
-            foreach (var edge in model.Edges)
-            {
-                var output = edge.From.Attributes.Where(x => x.Name == "outputType").First().StringValue;
-                var inputs = edge.To.Attributes.Where(x => x.Name == "inputType").Select(x => x.StringValue);
-                var result = inputs.Contains(output);
-                if (!result) return false;
-            }
-            return true;
-        }
-
-        private bool isAcyclic()
-        {
-            var roots = new List<INode>();
             foreach (var node in model.Nodes)
             {
-                var inEdges = model.Edges.Where(x => x.To == node).ToList();
-                if (inEdges.Count() == 0)
+                var type = node.Attributes.Where(x => x.Name == "type").First().StringValue;
+                if (type == "positional")
                 {
-                    roots.Add(node);
-                }
-            }
-            if (roots.Count == 0) return model.Edges.Count() == 0;
-            var result = true;
-            foreach (var edge in roots)
-            {
-                result = result && isAcyclicPart(edge, new List<int>(), new List<int>());
-            }
-            return result;
-        }
+                    // Check through attribute "children"
+                    var children = node.Attributes.Where(x => x.Name == "children").First().StringValue.Split(", ");
+                    if (children.Length == 0)
+                    {
+                        return false;
+                    }
+                    foreach (var child in children)
+                    {
+                        if (!model.Nodes.Where(x => x.Name == child).Any(x => x.Class.Name == "Read"))
+                        {
+                            return false;
+                        }
+                    }
 
-        private bool isAcyclicPart(INode node, List<int> visited, List<int> stack)
-        {
-            if (stack.Contains(node.Id)) return false;
-            if (visited.Contains(node.Id)) return true;
-            stack.Add(node.Id);
-            visited.Add(node.Id);
-            var children = model.Edges.Where(x => x.From == node).Select(x => (INode)x.To).ToList();
-            foreach (var c in children)
-            {
-                if (isAcyclicPart(c, visited, stack))
-                {
-                    return true;
+                    // Check through edges
+                    if (!model.Edges.Where(x => x.From == node).Any(x => x.To.Class.Name == "Read"))
+                    {
+                        return false;
+                    }
                 }
             }
-            stack.Remove(node.Id);
             return true;
         }
 
-        private bool isCyclicUtil(int i, bool[] visited, bool[] stack)
+        private bool CheckTupleOperatorsHaveNoReaders()
         {
-            if (stack[i])
-                return true;
+            foreach (var node in model.Nodes)
+            {
+                var type = node.Attributes.Where(x => x.Name == "type").First().StringValue;
+                if (type == "tuple")
+                {
+                    // Check through attribute "children"
+                    var children = node.Attributes.Where(x => x.Name == "children").First().StringValue.Split(", ");
+                    foreach (var child in children)
+                    {
+                        if (model.Nodes.Where(x => x.Name == child).Any(x => x.Class.Name == "Read"))
+                        {
+                            return false;
+                        }
+                    }
 
-            if (visited[i])
-                return false;
-
-            visited[i] = true;
-
-            stack[i] = true;
-            var children = model.Edges.Where(x => x.From == nodes[i]).Select(x => Array.IndexOf(nodes, x)).ToList();
-
-            foreach (int c in children)
-                if (isCyclicUtil(c, visited, stack))
-                    return true;
-
-            stack[i] = false;
-
-            return false;
+                    // Check through edges
+                    if (model.Edges.Where(x => x.From == node).Any(x => x.To.Class.Name == "Read"))
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
     }
 }
