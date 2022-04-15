@@ -6,6 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="RepoConstraintsCheck.Tests\**" />
+    <EmbeddedResource Remove="RepoConstraintsCheck.Tests\**" />
+    <None Remove="RepoConstraintsCheck.Tests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Repo\Repo.Source\Repo.fsproj" />
   </ItemGroup>
 
