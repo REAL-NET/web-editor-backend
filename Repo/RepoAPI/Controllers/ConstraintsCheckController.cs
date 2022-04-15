@@ -13,16 +13,16 @@ namespace RepoAPI.Controllers
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]
-    public class ConstraintsCheckSystemController : ControllerBase
+    public class ConstraintsCheckController : ControllerBase
     {
         private IModel targetModel;
         private readonly IMapper _mapper;
-        private NativeConstraintsCheckSystem checkingSystem;
+        private NativeConstraintsCheckSystem checkSystem;
         /// <summary>
         /// Initializes a new instance of the <see cref="T:RepoAPI.Controllers.ContraintsController"/> class.
         /// </summary>
         /// <param name="mapper"></param>
-        public ConstraintsCheckSystemController(IMapper mapper)
+        public ConstraintsCheckController(IMapper mapper)
         {
             _mapper = mapper;
         }
@@ -46,10 +46,10 @@ namespace RepoAPI.Controllers
             {
                 this.targetModel = RepoContainer.CurrentRepo().Model(targetModel);
                 var constraint1 = RepoContainer.CurrentRepo().Model("SimpleConstraintsModel");
-                checkingSystem = new NativeConstraintsCheckSystem(this.targetModel);
-                checkingSystem.AddConstraint(constraint1, "SimpleConstraintsModel");
+                checkSystem = new NativeConstraintsCheckSystem(this.targetModel);
+                checkSystem.AddConstraint(constraint1, "SimpleConstraintsModel");
             }
-            return checkingSystem.Check();
+            return checkSystem.Check();
         }
 
         [HttpGet("secondcheck/{targetModel}")]
@@ -61,10 +61,10 @@ namespace RepoAPI.Controllers
                 this.targetModel = RepoContainer.CurrentRepo().Model(targetModel);
                 var constraint1 = RepoContainer.CurrentRepo().Model("SimpleConstraintsModel");
                 var constraint2 = RepoContainer.CurrentRepo().Model("SecondConstraintsModel");
-                var secondCheckingSystem = new NativeConstraintsCheckSystem(this.targetModel);
-                secondCheckingSystem.AddConstraint(constraint1, "SimpleConstraintsModel");
-                secondCheckingSystem.AddConstraint(constraint2, "SecondConstraintsModel");
-                result = secondCheckingSystem.Check();
+                var secondCheckSystem = new NativeConstraintsCheckSystem(this.targetModel);
+                secondCheckSystem.AddConstraint(constraint1, "SimpleConstraintsModel");
+                secondCheckSystem.AddConstraint(constraint2, "SecondConstraintsModel");
+                result = secondCheckSystem.Check();
             }
             return result;
         }
@@ -77,8 +77,8 @@ namespace RepoAPI.Controllers
             {
                 this.targetModel = RepoContainer.CurrentRepo().Model(targetModel);
                 var queryStrategy = new QueryConstraintsCheckStrategy(this.targetModel);
-                var checkingSystem = new ConstraintsCheckSystem(this.targetModel, queryStrategy);
-                result = checkingSystem.Check();
+                var checkSystem = new ConstraintsCheckSystem(this.targetModel, queryStrategy);
+                result = checkSystem.Check();
             }
             return result;
         }
@@ -91,8 +91,8 @@ namespace RepoAPI.Controllers
             {
                 this.targetModel = RepoContainer.CurrentRepo().Model(targetModel);
                 var queryStrategy = new QueryConstraintsCheckStrategy(this.targetModel);
-                var checkingSystem = new ConstraintsCheckSystem(this.targetModel, queryStrategy);
-                result = checkingSystem.Count();
+                var checkSystem = new ConstraintsCheckSystem(this.targetModel, queryStrategy);
+                result = checkSystem.Count();
             }
             return result;
         }
