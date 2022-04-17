@@ -84,7 +84,7 @@ namespace RepoAPI.Controllers
         }
 
         [HttpGet("queryCheckWithErrorInfo/{targetModel}")]
-        public ActionResult<(bool, IEnumerable<(int, IEnumerable<int>)>)> QueryCheckWithInfoModel(string targetModel)
+        public ActionResult<string> QueryCheckWithInfoModel(string targetModel)
         {
             var result = (false, Enumerable.Empty<(int, IEnumerable<int>)>());
             lock (Locker.obj)
@@ -94,7 +94,40 @@ namespace RepoAPI.Controllers
                 var checkSystem = new ConstraintsCheckSystem(this.targetModel, queryStrategy);
                 result = checkSystem.CheckWithErrorInfo();
             }
-            return result;
+            var output = "{";
+            output += $"\"result\":{result.Item1}";
+            if (result.Item2.Count() > 0)
+            {
+                output += ",errors:";
+            }
+            var i = 0;
+            foreach (var error in result.Item2)
+            {
+                i++;
+                output += "[";
+                output += "{";
+                output += $"\"code\":{error.Item1}, ids:";
+                output += "[";
+                var j = 0;
+                foreach (var id in error.Item2)
+                {
+                    ++j;
+                    output += "{";
+                    output += $"\"id\":{id}";
+                    output += "}";
+                    if (j < error.Item2.Count())
+                    {
+                        output += ",";
+                    }
+                }
+                output += "]}]";
+                if (i < result.Item2.Count())
+                {
+                    output += ",";
+                }
+            }
+            output += "}";
+            return output;
         }
 
         //[HttpGet("count/{targetModel}")]
