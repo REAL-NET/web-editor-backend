@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Repo;
 
 namespace RepoConstraintsCheck
@@ -17,6 +18,11 @@ namespace RepoConstraintsCheck
         public bool Check()
         {
             return checkStrategy.Check(targetModel);
+        }
+
+        public (bool, IEnumerable<(int, IEnumerable<int>)>) CheckWithErrorInfo()
+        {
+            return checkStrategy.CheckWithErrorInfo(targetModel);
         }
 
         public int Count()

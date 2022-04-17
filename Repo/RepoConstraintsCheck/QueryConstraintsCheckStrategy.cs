@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Repo;
 
@@ -9,81 +10,119 @@ namespace RepoConstraintsCheck
     {
         private IModel model;
         private IEnumerable<INode> operators;
+        private static readonly IEnumerable<(int, string)> errors = new ReadOnlyCollection<(int, string)>
+        (new List<(int, string)> {
+             (1, "Type attribute is missing"),
+             (2, "Positional operator does not have any readers")
+        });
+
         public QueryConstraintsCheckStrategy(IModel model)
         {
             this.model = model;
-            operators = model.Nodes.Where(x => x.Class.Name == "Operator");
+            operators = model.Nodes.Where(x => x.Attributes.Where(x => x.Name == "kind").FirstOrDefault().StringValue == "operator");
         }
 
         public bool Check(IModel model)
         {
-            return CheckPositionalOperatorsHaveReaders() && CheckTupleOperatorsHaveNoReaders();
+            return CheckPositionalOperatorsHaveReaders().Item1;// && CheckTupleOperatorsHaveNoReaders().Item1;
         }
 
-        private bool CheckPositionalOperatorsHaveReaders()
+        public (bool, IEnumerable<(int, IEnumerable<int>)>) CheckWithErrorInfo(IModel model)
         {
+            return CheckPositionalOperatorsHaveReaders();// && CheckTupleOperatorsHaveNoReaders();
+        }
+
+        private (bool, IEnumerable<(int, IEnumerable<int>)>) AddErrorInfoToResult((bool, IEnumerable<(int, IEnumerable<int>)>) result, int errorCode, int id)
+        {
+            result.Item1 = false;
+            var item = result.Item2.Where(x => x.Item1 == errorCode).FirstOrDefault();
+            if (item == default((int, IEnumerable<int>)))
+            {
+                var ids = new List<int>();
+                ids.Add(id);
+                result.Item2 = result.Item2.Append((errorCode, ids)).ToList();
+            }
+            else
+            {
+                if (!item.Item2.Contains(id))
+                {
+                    var errorList = result.Item2.Where(x => x.Item1 == errorCode).FirstOrDefault();
+                    errorList.Item2 = errorList.Item2.Append(id).ToList();
+                    result.Item2 = result.Item2.Where(x => x.Item1 != errorCode).ToList().Append(errorList);
+                }
+            }
+            return result;
+        }
+
+        private (bool, IEnumerable<(int, IEnumerable<int>)>) CheckPositionalOperatorsHaveReaders()
+        {
+            var result = (true, Enumerable.Empty<(int, IEnumerable<int>)>());
+            result.Item2 = new List<(int, IEnumerable<int>)>();
             foreach (var node in operators)
             {
                 var type = node.Attributes.Where(x => x.Name == "type").FirstOrDefault();
                 if (type == null)
                 {
-                    return false;
+                    result = AddErrorInfoToResult(result, 1, node.Id);
                 }
-                if (type.StringValue == "positional")
+                else if (type.StringValue == "positional")
                 {
                     // Check through attribute "children"
                     var children = node.Attributes.Where(x => x.Name == "children").FirstOrDefault().StringValue.Split(", ");
-                    if (children.Length == 0)
+                    if (children.Length == 0 || children.First() == "")
                     {
-                        return false;
+                        result = AddErrorInfoToResult(result, 2, node.Id);
                     }
-                    foreach (var child in children)
+                    else
                     {
-                        if (!model.Nodes.Where(x => x.Name == child).Any(x => x.Class.Name == "Read"))
+                        foreach (var child in children)
                         {
-                            return false;
+                            if (!model.Nodes.Where(x => x.Name == child).Any(x => x.Class.Name == "Read"))
+                            {
+                                result = AddErrorInfoToResult(result, 2, node.Id);
+                            }
                         }
                     }
 
                     // Check through edges
-                    if (!model.Edges.Where(x => x.From == node).Any(x => x.To.Class.Name == "Read"))
+                    if (model.Edges.Where(x => x.From == node).Count() == 0 || !model.Edges.Where(x => x.From == node).Any(x => x.To.Class.Name == "Read"))
                     {
-                        return false;
+                        result = AddErrorInfoToResult(result, 2, node.Id);
                     }
                 }
             }
-            return true;
+            return result;
         }
 
-        private bool CheckTupleOperatorsHaveNoReaders()
-        {
-            foreach (var node in operators)
-            {
-                var type = node.Attributes.Where(x => x.Name == "type").FirstOrDefault();
-                if (type == null)
-                {
-                    return false;
-                }
-                if (type.StringValue == "tuple")
-                {
-                    // Check through attribute "children"
-                    var children = node.Attributes.Where(x => x.Name == "children").FirstOrDefault().StringValue.Split(", ");
-                    foreach (var child in children)
-                    {
-                        if (model.Nodes.Where(x => x.Name == child).Any(x => x.Class.Name == "Read"))
-                        {
-                            return false;
-                        }
-                    }
+        //private (bool, IEnumerable<(int, IEnumerable<int>)>) CheckTupleOperatorsHaveNoReaders()
+        //{
+        //    foreach (var node in operators)
+        //    {
+        //        var type = node.Attributes.Where(x => x.Name == "type").FirstOrDefault();
+        //        if (type == null)
+        //        {
+        //            return false;
+        //        }
+        //        if (type.StringValue == "tuple")
+        //        {
+        //            // Check through attribute "children"
+        //            var children = node.Attributes.Where(x => x.Name == "children").FirstOrDefault().StringValue.Split(", ");
+        //            foreach (var child in children)
+        //            {
+        //                if (model.Nodes.Where(x => x.Name == child).Any(x => x.Class.Name == "Read"))
+        //                {
+        //                    return false;
+        //                }
+        //            }
 
-                    // Check through edges
-                    if (model.Edges.Where(x => x.From == node).Any(x => x.To.Class.Name == "Read"))
-                    {
-                        return false;
-                    }
-                }
-            }
-            return true;
-        }
+        //            // Check through edges
+        //            if (model.Edges.Where(x => x.From == node).Any(x => x.To.Class.Name == "Read"))
+        //            {
+        //                return false;
+        //            }
+        //        }
+        //    }
+        //    return true;
+        //}
     }
 }

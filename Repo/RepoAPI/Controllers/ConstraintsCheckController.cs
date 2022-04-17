@@ -83,27 +83,41 @@ namespace RepoAPI.Controllers
             return result;
         }
 
-        [HttpGet("count/{targetModel}")]
-        public ActionResult<int> QueryCount(string targetModel)
+        [HttpGet("queryCheckWithErrorInfo/{targetModel}")]
+        public ActionResult<(bool, IEnumerable<(int, IEnumerable<int>)>)> QueryCheckWithInfoModel(string targetModel)
         {
-            var result = 0;
+            var result = (false, Enumerable.Empty<(int, IEnumerable<int>)>());
             lock (Locker.obj)
             {
                 this.targetModel = RepoContainer.CurrentRepo().Model(targetModel);
                 var queryStrategy = new QueryConstraintsCheckStrategy(this.targetModel);
                 var checkSystem = new ConstraintsCheckSystem(this.targetModel, queryStrategy);
-                result = checkSystem.Count();
+                result = checkSystem.CheckWithErrorInfo();
             }
             return result;
         }
 
+        //[HttpGet("count/{targetModel}")]
+        //public ActionResult<int> QueryCount(string targetModel)
+        //{
+        //    var result = 0;
+        //    lock (Locker.obj)
+        //    {
+        //        this.targetModel = RepoContainer.CurrentRepo().Model(targetModel);
+        //        var queryStrategy = new QueryConstraintsCheckStrategy(this.targetModel);
+        //        var checkSystem = new ConstraintsCheckSystem(this.targetModel, queryStrategy);
+        //        result = checkSystem.Count();
+        //    }
+        //    return result;
+        //}
+
         //[HttpPost("{targetModel}/{name}")]
         //public void AddConstraint(string targetModel, string name)
         //{
-        //  lock (Locker.obj)
-        //  {
-        //    checkingSystem.AddConstraint
-        //  }
+        //    lock (Locker.obj)
+        //    {
+        //        checkingSystem.AddConstraint
+        //    }
         //}
     }
 }
