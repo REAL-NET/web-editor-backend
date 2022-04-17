@@ -98,7 +98,7 @@ namespace RepoAPI.Controllers
             output += $"\"result\":{result.Item1}";
             if (result.Item2.Count() > 0)
             {
-                output += ",errors:";
+                output += ",\"errors\":";
             }
             var i = 0;
             foreach (var error in result.Item2)
