@@ -95,7 +95,7 @@ namespace RepoAPI.Controllers
                 result = checkSystem.CheckWithErrorInfo();
             }
             var output = "{";
-            output += $"\"result\":{result.Item1}";
+            output += $"\"result\":{result.Item1.ToString().ToLower()}";
             if (result.Item2.Count() > 0)
             {
                 output += ",\"errors\":";
@@ -106,7 +106,7 @@ namespace RepoAPI.Controllers
                 i++;
                 output += "[";
                 output += "{";
-                output += $"\"code\":{error.Item1}, ids:";
+                output += $"\"code\":{error.Item1}, \"ids\":";
                 output += "[";
                 var j = 0;
                 foreach (var id in error.Item2)
