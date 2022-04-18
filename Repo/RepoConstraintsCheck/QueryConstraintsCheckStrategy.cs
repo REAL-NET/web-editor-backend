@@ -67,22 +67,22 @@ namespace RepoConstraintsCheck
                 }
                 else if (type.StringValue == "positional")
                 {
-                    // Check through attribute "children"
-                    var children = node.Attributes.Where(x => x.Name == "children").FirstOrDefault().StringValue.Split(", ");
-                    if (children.Length == 0 || children.First() == "")
-                    {
-                        result = AddErrorInfoToResult(result, 2, node.Id);
-                    }
-                    else
-                    {
-                        foreach (var child in children)
-                        {
-                            if (!model.Nodes.Where(x => x.Name == child).Any(x => x.Class.Name == "Read"))
-                            {
-                                result = AddErrorInfoToResult(result, 2, node.Id);
-                            }
-                        }
-                    }
+                    //// Check through attribute "children"
+                    //var children = node.Attributes.Where(x => x.Name == "children").FirstOrDefault().StringValue.Split(", ");
+                    //if (children.Length == 0 || children.First() == "")
+                    //{
+                    //    result = AddErrorInfoToResult(result, 2, node.Id);
+                    //}
+                    //else
+                    //{
+                    //    foreach (var child in children)
+                    //    {
+                    //        if (!model.Nodes.Where(x => x.Name == child).Any(x => x.Class.Name == "Read"))
+                    //        {
+                    //            result = AddErrorInfoToResult(result, 2, node.Id);
+                    //        }
+                    //    }
+                    //}
 
                     // Check through edges
                     if (model.Edges.Where(x => x.From == node).Count() == 0 || !model.Edges.Where(x => x.From == node).Any(x => x.To.Class.Name == "Read"))

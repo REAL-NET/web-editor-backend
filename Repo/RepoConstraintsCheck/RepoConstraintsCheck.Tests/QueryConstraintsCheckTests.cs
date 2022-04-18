@@ -36,14 +36,17 @@ namespace RepoConstraintsCheckTests
         }
 
         [Test]
-        public void CheckWithErrorInfoPositionalOperatorsHaveReadersThroughAttributeTest()
+        public void CheckWithErrorInfoPositionalOperatorsHaveReadersTest()
         {
             var queryModel = repo.Model("QueryTestModel");
             var queryStrategy = new QueryConstraintsCheckStrategy(queryModel);
             var checkSystem = new ConstraintsCheckSystem(queryModel, queryStrategy);
-            var join = queryModel.Nodes.Where(x => x.Name == "join").FirstOrDefault();
-            var joinChildren = join.Attributes.Where(x => x.Name == "children").FirstOrDefault();
-            joinChildren.StringValue = "";
+            var join = queryModel.Nodes.Where(x => x.Name == "aJoin").FirstOrDefault();
+            var edges = queryModel.Edges.Where(x => x.From.Name == "aJoin" && x.To.Name == "aRead");
+            foreach (var edge in edges)
+            {
+                queryModel.DeleteElement(edge);
+            }
             var result = checkSystem.CheckWithErrorInfo();
             Assert.IsFalse(result.Item1);
             Assert.AreEqual(2, result.Item2.First().Item1);
@@ -51,36 +54,20 @@ namespace RepoConstraintsCheckTests
         }
 
         [Test]
-        public void CheckWithErrorInfoPositionalOperatorsHaveReadersThroughEdgesTest()
+        public void CheckWithErrorInfoPositionalOperatorsHaveReadersMultipleTest()
         {
             var queryModel = repo.Model("QueryTestModel");
             var queryStrategy = new QueryConstraintsCheckStrategy(queryModel);
             var checkSystem = new ConstraintsCheckSystem(queryModel, queryStrategy);
-            var join = queryModel.Nodes.Where(x => x.Name == "join").FirstOrDefault();
-            var edge1 = queryModel.Edges.Where(x => x.To.Name == "read1").FirstOrDefault();
-            var edge2 = queryModel.Edges.Where(x => x.To.Name == "read2").FirstOrDefault();
-            queryModel.DeleteElement(edge1);
-            queryModel.DeleteElement(edge2);
-            var result = checkSystem.CheckWithErrorInfo();
-            Assert.IsFalse(result.Item1);
-            Assert.AreEqual(2, result.Item2.First().Item1);
-            Assert.AreEqual(join.Id, result.Item2.First().Item2.First());
-        }
-
-        [Test]
-        public void CheckWithErrorInfoPositionalOperatorsHaveReadersMultipleMultipleTest()
-        {
-            var queryModel = repo.Model("QueryTestModel");
-            var queryStrategy = new QueryConstraintsCheckStrategy(queryModel);
-            var checkSystem = new ConstraintsCheckSystem(queryModel, queryStrategy);
-            var join = queryModel.Nodes.Where(x => x.Name == "join").FirstOrDefault();
-            var edge1 = queryModel.Edges.Where(x => x.To.Name == "read1").FirstOrDefault();
-            var edge2 = queryModel.Edges.Where(x => x.To.Name == "read2").FirstOrDefault();
-            queryModel.DeleteElement(edge1);
-            queryModel.DeleteElement(edge2);
-            var filter = queryModel.Nodes.Where(x => x.Name == "filter").FirstOrDefault();
-            var filterChildren = filter.Attributes.Where(x => x.Name == "children").FirstOrDefault();
-            filterChildren.StringValue = "";
+            var join = queryModel.Nodes.Where(x => x.Name == "aJoin").FirstOrDefault();
+            var edges = queryModel.Edges.Where(x => x.From.Name == "aJoin" && x.To.Name == "aRead");
+            foreach (var edge in edges)
+            {
+                queryModel.DeleteElement(edge);
+            }
+            var filter = queryModel.Nodes.Where(x => x.Name == "aFilter").FirstOrDefault();
+            var filterEdge = queryModel.Edges.Where(x => x.From.Name == "aFilter").FirstOrDefault();
+            queryModel.DeleteElement(filterEdge);
             var result = checkSystem.CheckWithErrorInfo();
             Assert.IsFalse(result.Item1);
             Assert.AreEqual(2, result.Item2.First().Item1);
