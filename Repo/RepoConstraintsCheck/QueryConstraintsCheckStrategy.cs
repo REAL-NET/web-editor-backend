@@ -13,7 +13,8 @@ namespace RepoConstraintsCheck
         private static readonly IEnumerable<(int, string)> errors = new ReadOnlyCollection<(int, string)>
         (new List<(int, string)> {
              (1, "Type attribute is missing"),
-             (2, "Positional operator does not have any readers")
+             (2, "Positional operator does not have any readers"),
+             (3, "Tuple operator have a reader")
         });
 
         public QueryConstraintsCheckStrategy(IModel model)
@@ -24,12 +25,15 @@ namespace RepoConstraintsCheck
 
         public bool Check(IModel model)
         {
-            return CheckPositionalOperatorsHaveReaders().Item1;// && CheckTupleOperatorsHaveNoReaders().Item1;
+            return CheckPositionalOperatorsHaveReaders().Item1 && CheckTupleOperatorsHaveNoReaders().Item1;
         }
 
         public (bool, IEnumerable<(int, IEnumerable<int>)>) CheckWithErrorInfo(IModel model)
         {
-            return CheckPositionalOperatorsHaveReaders();// && CheckTupleOperatorsHaveNoReaders();
+            var result = (true, Enumerable.Empty<(int, IEnumerable<int>)>());
+            result.Item1 = Check(model);
+            result.Item2 = CheckPositionalOperatorsHaveReaders().Item2.Concat(CheckTupleOperatorsHaveNoReaders().Item2);
+            return result;
         }
 
         private (bool, IEnumerable<(int, IEnumerable<int>)>) AddErrorInfoToResult((bool, IEnumerable<(int, IEnumerable<int>)>) result, int errorCode, int id)
@@ -67,27 +71,39 @@ namespace RepoConstraintsCheck
                 }
                 else if (type.StringValue == "positional")
                 {
-                    //// Check through attribute "children"
-                    //var children = node.Attributes.Where(x => x.Name == "children").FirstOrDefault().StringValue.Split(", ");
-                    //if (children.Length == 0 || children.First() == "")
-                    //{
-                    //    result = AddErrorInfoToResult(result, 2, node.Id);
-                    //}
-                    //else
-                    //{
-                    //    foreach (var child in children)
-                    //    {
-                    //        if (!model.Nodes.Where(x => x.Name == child).Any(x => x.Class.Name == "Read"))
-                    //        {
-                    //            result = AddErrorInfoToResult(result, 2, node.Id);
-                    //        }
-                    //    }
-                    //}
-
-                    // Check through edges
                     if (model.Edges.Where(x => x.From == node).Count() == 0 || !model.Edges.Where(x => x.From == node).Any(x => x.To.Class.Name == "Read"))
                     {
                         result = AddErrorInfoToResult(result, 2, node.Id);
+                    }
+                }
+            }
+            return result;
+        }
+
+        private (bool, IEnumerable<(int, IEnumerable<int>)>) CheckTupleOperatorsHaveNoReaders()
+        {
+            var result = (true, Enumerable.Empty<(int, IEnumerable<int>)>());
+            result.Item2 = new List<(int, IEnumerable<int>)>();
+            foreach (var node in operators)
+            {
+                var type = node.Attributes.Where(x => x.Name == "type").FirstOrDefault();
+                if (type == null)
+                {
+                    result = AddErrorInfoToResult(result, 1, node.Id);
+                }
+                else if (type.StringValue == "tuple")
+                {
+                    var outgoingEdges = model.Edges.Where(x => x.From == node);
+                    if (outgoingEdges.Count() != 0 && outgoingEdges.Any(x => x.To.Class.Name == "Read"))
+                    {
+                        result = AddErrorInfoToResult(result, 3, node.Id);
+                        foreach (var outgoingEdge in outgoingEdges)
+                        {
+                            if (outgoingEdge.To.Class.Name == "Read")
+                            {
+                                result = AddErrorInfoToResult(result, 3, outgoingEdge.To.Id);
+                            }
+                        }
                     }
                 }
             }
