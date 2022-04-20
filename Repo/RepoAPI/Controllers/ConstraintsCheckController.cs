@@ -98,13 +98,12 @@ namespace RepoAPI.Controllers
             output += $"\"result\":{result.Item1.ToString().ToLower()}";
             if (result.Item2.Count() > 0)
             {
-                output += ",\"errors\":";
+                output += ",\"errors\":[";
             }
             var i = 0;
             foreach (var error in result.Item2)
             {
                 i++;
-                output += "[";
                 output += "{";
                 output += $"\"code\":{error.Item1}, \"ids\":";
                 output += "[";
@@ -120,11 +119,15 @@ namespace RepoAPI.Controllers
                         output += ",";
                     }
                 }
-                output += "]}]";
+                output += "]}";
                 if (i < result.Item2.Count())
                 {
                     output += ",";
                 }
+            }
+            if (result.Item2.Count() > 0)
+            {
+                output += "]";
             }
             output += "}";
             return output;
