@@ -14,7 +14,8 @@ namespace RepoConstraintsCheck
         (new List<(int, string)> {
              (1, "Type attribute is missing"),
              (2, "Positional operator does not have any readers"),
-             (3, "Tuple operator have a reader")
+             (3, "Tuple operator have a reader"),
+             (4, "Leaf is not a DataSource operator")
         });
 
         public QueryConstraintsCheckStrategy(IModel model)
@@ -25,14 +26,18 @@ namespace RepoConstraintsCheck
 
         public bool Check(IModel model)
         {
-            return CheckPositionalOperatorsHaveReaders().Item1 && CheckTupleOperatorsHaveNoReaders().Item1;
+            return CheckPositionalOperatorsHaveReaders().Item1
+                && CheckTupleOperatorsHaveNoReaders().Item1
+                && CheckLeavesAreDS().Item1;
         }
 
         public (bool, IEnumerable<(int, IEnumerable<int>)>) CheckWithErrorInfo(IModel model)
         {
             var result = (true, Enumerable.Empty<(int, IEnumerable<int>)>());
             result.Item1 = Check(model);
-            result.Item2 = CheckPositionalOperatorsHaveReaders().Item2.Concat(CheckTupleOperatorsHaveNoReaders().Item2);
+            result.Item2 = CheckPositionalOperatorsHaveReaders().Item2
+                .Concat(CheckTupleOperatorsHaveNoReaders().Item2)
+                .Concat(CheckLeavesAreDS().Item2);
             return result;
         }
 
@@ -110,35 +115,32 @@ namespace RepoConstraintsCheck
             return result;
         }
 
-        //private (bool, IEnumerable<(int, IEnumerable<int>)>) CheckTupleOperatorsHaveNoReaders()
-        //{
-        //    foreach (var node in operators)
-        //    {
-        //        var type = node.Attributes.Where(x => x.Name == "type").FirstOrDefault();
-        //        if (type == null)
-        //        {
-        //            return false;
-        //        }
-        //        if (type.StringValue == "tuple")
-        //        {
-        //            // Check through attribute "children"
-        //            var children = node.Attributes.Where(x => x.Name == "children").FirstOrDefault().StringValue.Split(", ");
-        //            foreach (var child in children)
-        //            {
-        //                if (model.Nodes.Where(x => x.Name == child).Any(x => x.Class.Name == "Read"))
-        //                {
-        //                    return false;
-        //                }
-        //            }
-
-        //            // Check through edges
-        //            if (model.Edges.Where(x => x.From == node).Any(x => x.To.Class.Name == "Read"))
-        //            {
-        //                return false;
-        //            }
-        //        }
-        //    }
-        //    return true;
-        //}
+        private (bool, IEnumerable<(int, IEnumerable<int>)>) CheckLeavesAreDS()
+        {
+            var result = (true, Enumerable.Empty<(int, IEnumerable<int>)>());
+            result.Item2 = new List<(int, IEnumerable<int>)>();
+            foreach (var node in operators)
+            {
+                var type = node.Attributes.Where(x => x.Name == "type").FirstOrDefault();
+                if (type == null)
+                {
+                    result = AddErrorInfoToResult(result, 1, node.Id);
+                }
+                else
+                {
+                    var incomingEdges = model.Edges.Where(x => x.To == node);
+                    var outgoingEdgesToOperators = model.Edges.Where(x => x.From == node && x.To.Class.Name != "Read"
+                    && x.To.Class.Name != "OperatorInternals");
+                    if (incomingEdges.Count() != 0 && outgoingEdgesToOperators.Count() == 0)
+                    {
+                        if (node.Class.Name != "DS")
+                        {
+                            result = AddErrorInfoToResult(result, 4, node.Id);
+                        }
+                    }
+                }
+            }
+            return result;
+        }
     }
 }

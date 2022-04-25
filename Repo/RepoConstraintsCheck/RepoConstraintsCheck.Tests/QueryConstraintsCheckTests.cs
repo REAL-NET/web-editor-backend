@@ -138,5 +138,20 @@ namespace RepoConstraintsCheckTests
             Assert.IsTrue(result.Item2.ElementAt(1).Item2.Contains(sort.Id));
             Assert.IsTrue(result.Item2.ElementAt(1).Item2.Contains(read.Id));
         }
+
+        [Test]
+        public void CheckWithErrorInfoLeavesAreDSTest()
+        {
+            var queryModel = repo.Model(modelName);
+            var queryStrategy = new QueryConstraintsCheckStrategy(queryModel);
+            var checkSystem = new ConstraintsCheckSystem(queryModel, queryStrategy);
+            var edge = queryModel.Edges.Where(x => x.To.Name == "aDS").FirstOrDefault();
+            queryModel.DeleteElement(edge);
+            var join = queryModel.Nodes.Where(x => x.Name == "aJoin").FirstOrDefault();
+            var result = checkSystem.CheckWithErrorInfo();
+            Assert.IsFalse(result.Item1);
+            Assert.AreEqual(4, result.Item2.First().Item1);
+            Assert.AreEqual(join.Id, result.Item2.First().Item2.First());
+        }
     }
 }
