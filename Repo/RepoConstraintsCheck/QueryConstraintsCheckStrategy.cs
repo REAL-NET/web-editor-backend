@@ -16,7 +16,8 @@ namespace RepoConstraintsCheck
              (2, "Positional operators must have readers"),
              (3, "Tuple operators must not have readers"),
              (4, "Leaves must be DataSource operators"),
-             (5, "Join operators must have at least two readers")
+             (5, "Join operators must have at least two readers"),
+             (6, "Last operator must be tuple")
         });
 
         public QueryConstraintsCheckStrategy(IModel model)
@@ -29,7 +30,8 @@ namespace RepoConstraintsCheck
         {
             return CheckPositionalOperatorsHaveReaders().Item1
                 && CheckTupleOperatorsHaveNoReaders().Item1
-                && CheckLeavesAreDS().Item1;
+                && CheckLeavesAreDS().Item1
+                && CheckLastOperatorIsTuple().Item1;
         }
 
         public (bool, IEnumerable<(int, IEnumerable<int>)>) CheckWithErrorInfo(IModel model)
@@ -38,7 +40,8 @@ namespace RepoConstraintsCheck
             result.Item1 = Check(model);
             result.Item2 = CheckPositionalOperatorsHaveReaders().Item2
                 .Concat(CheckTupleOperatorsHaveNoReaders().Item2)
-                .Concat(CheckLeavesAreDS().Item2);
+                .Concat(CheckLeavesAreDS().Item2)
+                .Concat(CheckLastOperatorIsTuple().Item2);
             return result;
         }
 
@@ -133,29 +136,20 @@ namespace RepoConstraintsCheck
             result.Item2 = new List<(int, IEnumerable<int>)>();
             foreach (var node in operators)
             {
-                var type = node.Attributes.Where(x => x.Name == "type").FirstOrDefault();
-                if (type == null)
+                var incomingEdges = model.Edges.Where(x => x.To == node && x.From.Class.Name != "OperatorInternals");
+                var outgoingEdgesToOperators = model.Edges.Where(x => x.From == node && x.To.Class.Name != "Read");
+                if (incomingEdges.Count() != 0 && outgoingEdgesToOperators.Count() == 0)
                 {
-                    result = AddErrorInfoToResult(result, 1, node.Id);
-                }
-                else
-                {
-                    var incomingEdges = model.Edges.Where(x => x.To == node);
-                    var outgoingEdgesToOperators = model.Edges.Where(x => x.From == node && x.To.Class.Name != "Read"
-                    && x.To.Class.Name != "OperatorInternals");
-                    if (incomingEdges.Count() != 0 && outgoingEdgesToOperators.Count() == 0)
+                    if (node.Class.Name != "DS")
                     {
-                        if (node.Class.Name != "DS")
-                        {
-                            result = AddErrorInfoToResult(result, 4, node.Id);
-                        }
+                        result = AddErrorInfoToResult(result, 4, node.Id);
                     }
                 }
             }
             return result;
         }
 
-        private (bool, IEnumerable<(int, IEnumerable<int>)>) Check()
+        private (bool, IEnumerable<(int, IEnumerable<int>)>) CheckLastOperatorIsTuple()
         {
             var result = (true, Enumerable.Empty<(int, IEnumerable<int>)>());
             result.Item2 = new List<(int, IEnumerable<int>)>();
@@ -168,14 +162,13 @@ namespace RepoConstraintsCheck
                 }
                 else
                 {
-                    var incomingEdges = model.Edges.Where(x => x.To == node);
-                    var outgoingEdgesToOperators = model.Edges.Where(x => x.From == node && x.To.Class.Name != "Read"
-                    && x.To.Class.Name != "OperatorInternals");
-                    if (incomingEdges.Count() != 0 && outgoingEdgesToOperators.Count() == 0)
+                    var incomingEdges = model.Edges.Where(x => x.To == node && x.From.Class.Name != "OperatorInternals");
+                    var outgoingEdgesToOperators = model.Edges.Where(x => x.From == node && x.To.Class.Name != "Read");
+                    if (incomingEdges.Count() == 0 && outgoingEdgesToOperators.Count() != 0)
                     {
-                        if (node.Class.Name != "DS")
+                        if (type.StringValue != "tuple")
                         {
-                            result = AddErrorInfoToResult(result, 4, node.Id);
+                            result = AddErrorInfoToResult(result, 6, node.Id);
                         }
                     }
                 }

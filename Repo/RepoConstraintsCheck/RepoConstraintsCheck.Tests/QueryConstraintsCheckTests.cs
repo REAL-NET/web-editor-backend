@@ -168,5 +168,19 @@ namespace RepoConstraintsCheckTests
             Assert.AreEqual(4, result.Item2.First().Item1);
             Assert.AreEqual(join.Id, result.Item2.First().Item2.First());
         }
+
+        [Test]
+        public void CheckWithErrorInfoLastOperatorIsTupleTest()
+        {
+            var queryModel = repo.Model(modelName);
+            var queryStrategy = new QueryConstraintsCheckStrategy(queryModel);
+            var checkSystem = new ConstraintsCheckSystem(queryModel, queryStrategy);
+            var sort = queryModel.Nodes.Where(x => x.Name == "aSort").FirstOrDefault();
+            sort.Attributes.Where(x => x.Name == "type").First().StringValue = "";
+            var result = checkSystem.CheckWithErrorInfo();
+            Assert.IsFalse(result.Item1);
+            Assert.AreEqual(6, result.Item2.First().Item1);
+            Assert.AreEqual(sort.Id, result.Item2.First().Item2.First());
+        }
     }
 }
