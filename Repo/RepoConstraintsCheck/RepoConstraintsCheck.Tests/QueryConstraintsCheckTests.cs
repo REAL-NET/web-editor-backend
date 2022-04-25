@@ -56,6 +56,21 @@ namespace RepoConstraintsCheckTests
         }
 
         [Test]
+        public void CheckWithErrorInfoJoinOperatorsHaveAtLeastTwoReadersTest()
+        {
+            var queryModel = repo.Model(modelName);
+            var queryStrategy = new QueryConstraintsCheckStrategy(queryModel);
+            var checkSystem = new ConstraintsCheckSystem(queryModel, queryStrategy);
+            var join = queryModel.Nodes.Where(x => x.Name == "aJoin").FirstOrDefault();
+            var edges = queryModel.Edges.Where(x => x.From.Name == "aJoin" && x.To.Name == "aRead");
+            queryModel.DeleteElement(edges.First());
+            var result = checkSystem.CheckWithErrorInfo();
+            Assert.IsFalse(result.Item1);
+            Assert.AreEqual(5, result.Item2.First().Item1);
+            Assert.AreEqual(join.Id, result.Item2.First().Item2.First());
+        }
+
+        [Test]
         public void CheckWithErrorInfoPositionalOperatorsHaveReadersMultipleTest()
         {
             var queryModel = repo.Model(modelName);

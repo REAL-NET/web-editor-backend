@@ -13,9 +13,10 @@ namespace RepoConstraintsCheck
         private static readonly IEnumerable<(int, string)> errors = new ReadOnlyCollection<(int, string)>
         (new List<(int, string)> {
              (1, "Type attribute is missing"),
-             (2, "Positional operator does not have any readers"),
-             (3, "Tuple operator have a reader"),
-             (4, "Leaf is not a DataSource operator")
+             (2, "Positional operators must have readers"),
+             (3, "Tuple operators must not have readers"),
+             (4, "Leaves must be DataSource operators"),
+             (5, "Join operators must have at least two readers")
         });
 
         public QueryConstraintsCheckStrategy(IModel model)
@@ -76,9 +77,20 @@ namespace RepoConstraintsCheck
                 }
                 else if (type.StringValue == "positional")
                 {
-                    if (model.Edges.Where(x => x.From == node).Count() == 0 || !model.Edges.Where(x => x.From == node).Any(x => x.To.Class.Name == "Read"))
+                    if (node.Class.Name != "DS" && node.Class.Name != "PosAND" && node.Class.Name != "PosOR" && node.Class.Name != "PosNOT")
                     {
-                        result = AddErrorInfoToResult(result, 2, node.Id);
+                        var outgoingEdgesToReaders = model.Edges.Where(x => x.From == node && x.To.Class.Name == "Read");
+                        if (outgoingEdgesToReaders.Count() == 0)
+                        {
+                            result = AddErrorInfoToResult(result, 2, node.Id);
+                        }
+                        else if (node.Class.Name == "Join")
+                        {
+                            if (outgoingEdgesToReaders.Count() < 2)
+                            {
+                                result = AddErrorInfoToResult(result, 5, node.Id);
+                            }
+                        }
                     }
                 }
             }
@@ -116,6 +128,34 @@ namespace RepoConstraintsCheck
         }
 
         private (bool, IEnumerable<(int, IEnumerable<int>)>) CheckLeavesAreDS()
+        {
+            var result = (true, Enumerable.Empty<(int, IEnumerable<int>)>());
+            result.Item2 = new List<(int, IEnumerable<int>)>();
+            foreach (var node in operators)
+            {
+                var type = node.Attributes.Where(x => x.Name == "type").FirstOrDefault();
+                if (type == null)
+                {
+                    result = AddErrorInfoToResult(result, 1, node.Id);
+                }
+                else
+                {
+                    var incomingEdges = model.Edges.Where(x => x.To == node);
+                    var outgoingEdgesToOperators = model.Edges.Where(x => x.From == node && x.To.Class.Name != "Read"
+                    && x.To.Class.Name != "OperatorInternals");
+                    if (incomingEdges.Count() != 0 && outgoingEdgesToOperators.Count() == 0)
+                    {
+                        if (node.Class.Name != "DS")
+                        {
+                            result = AddErrorInfoToResult(result, 4, node.Id);
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+
+        private (bool, IEnumerable<(int, IEnumerable<int>)>) Check()
         {
             var result = (true, Enumerable.Empty<(int, IEnumerable<int>)>());
             result.Item2 = new List<(int, IEnumerable<int>)>();
