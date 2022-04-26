@@ -17,7 +17,10 @@ namespace RepoConstraintsCheck
              (3, "Tuple operators must not have readers"),
              (4, "Leaves must be DataSource operators"),
              (5, "Join operators must have at least two readers"),
-             (6, "Last operator must be tuple")
+             (6, "Last operator must be tuple"),
+             (7, "Tuple operators must have tuple children"),
+             (8, "Positional operators must have positional children"),
+             (9, "Materializing operators must have positional children")
         });
 
         public QueryConstraintsCheckStrategy(IModel model)
@@ -31,7 +34,8 @@ namespace RepoConstraintsCheck
             return CheckPositionalOperatorsHaveReaders().Item1
                 && CheckTupleOperatorsHaveNoReaders().Item1
                 && CheckLeavesAreDS().Item1
-                && CheckLastOperatorIsTuple().Item1;
+                && CheckLastOperatorIsTuple().Item1
+                && CheckChildrenTypesAreCorrect().Item1;
         }
 
         public (bool, IEnumerable<(int, IEnumerable<int>)>) CheckWithErrorInfo(IModel model)
@@ -41,7 +45,8 @@ namespace RepoConstraintsCheck
             result.Item2 = CheckPositionalOperatorsHaveReaders().Item2
                 .Concat(CheckTupleOperatorsHaveNoReaders().Item2)
                 .Concat(CheckLeavesAreDS().Item2)
-                .Concat(CheckLastOperatorIsTuple().Item2);
+                .Concat(CheckLastOperatorIsTuple().Item2)
+                .Concat(CheckChildrenTypesAreCorrect().Item2);
             return result;
         }
 
@@ -169,6 +174,57 @@ namespace RepoConstraintsCheck
                         if (type.StringValue != "tuple")
                         {
                             result = AddErrorInfoToResult(result, 6, node.Id);
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+
+        private (bool, IEnumerable<(int, IEnumerable<int>)>) CheckChildrenTypesAreCorrect()
+        {
+            var result = (true, Enumerable.Empty<(int, IEnumerable<int>)>());
+            result.Item2 = new List<(int, IEnumerable<int>)>();
+            foreach (var node in operators)
+            {
+                var type = node.Attributes.Where(x => x.Name == "type").FirstOrDefault();
+                if (type == null)
+                {
+                    result = AddErrorInfoToResult(result, 1, node.Id);
+                }
+                else
+                {
+                    var outgoingEdgesToOperators = model.Edges.Where(x => x.From == node && x.To.Class.Name != "Read");
+                    if (outgoingEdgesToOperators.Count() != 0)
+                    {
+                        foreach (var outgoingEdge in outgoingEdgesToOperators)
+                        {
+                            var childOperator = outgoingEdge.To;
+                            var childOperatorType = childOperator.Attributes.Where(x => x.Name == "type").FirstOrDefault();
+                            if (type.StringValue == "tuple")
+                            {
+                                if (node.Class.Name != "Aggregate" && node.Class.Name != "Materialize")
+                                {
+                                    if (childOperatorType.StringValue != "tuple")
+                                    {
+                                        result = AddErrorInfoToResult(result, 7, childOperator.Id);
+                                    }
+                                }
+                                else
+                                {
+                                    if (childOperatorType.StringValue != "positional")
+                                    {
+                                        result = AddErrorInfoToResult(result, 9, childOperator.Id);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                if (childOperatorType.StringValue != "positional")
+                                {
+                                    result = AddErrorInfoToResult(result, 8, childOperator.Id);
+                                }
+                            }
                         }
                     }
                 }

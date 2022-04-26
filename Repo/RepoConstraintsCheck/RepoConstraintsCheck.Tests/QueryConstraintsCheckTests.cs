@@ -182,5 +182,42 @@ namespace RepoConstraintsCheckTests
             Assert.AreEqual(6, result.Item2.First().Item1);
             Assert.AreEqual(sort.Id, result.Item2.First().Item2.First());
         }
+
+        [Test]
+        public void CheckWithErrorInfoChildrenTypesAreCorrectFirstTest()
+        {
+            var queryModel = repo.Model(modelName);
+            var queryStrategy = new QueryConstraintsCheckStrategy(queryModel);
+            var checkSystem = new ConstraintsCheckSystem(queryModel, queryStrategy);
+            var aggregate = queryModel.Nodes.Where(x => x.Name == "aAggregate").FirstOrDefault();
+            aggregate.Attributes.Where(x => x.Name == "type").First().StringValue = "";
+            var result = checkSystem.CheckWithErrorInfo();
+            Assert.IsFalse(result.Item1);
+            Assert.AreEqual(7, result.Item2.First().Item1);
+            Assert.AreEqual(aggregate.Id, result.Item2.First().Item2.First());
+        }
+
+        [Test]
+        public void CheckWithErrorInfoChildrenTypesAreCorrectSecondTest()
+        {
+            var queryModel = repo.Model(modelName);
+            var queryStrategy = new QueryConstraintsCheckStrategy(queryModel);
+            var checkSystem = new ConstraintsCheckSystem(queryModel, queryStrategy);
+            var edges = queryModel.Edges.Where(x => x.From.Name == "aJoin" && x.To.Name == "aRead");
+            foreach (var edge in edges)
+            {
+                queryModel.DeleteElement(edge);
+            }
+            var join = queryModel.Nodes.Where(x => x.Name == "aJoin").FirstOrDefault();
+            join.Attributes.Where(x => x.Name == "type").First().StringValue = "tuple";
+            var ds = queryModel.Nodes.Where(x => x.Name == "aDS").FirstOrDefault();
+            var result = checkSystem.CheckWithErrorInfo();
+            Assert.IsFalse(result.Item1);
+            Assert.AreEqual(2, result.Item2.Count());
+            Assert.AreEqual(7, result.Item2.First().Item1);
+            Assert.AreEqual(9, result.Item2.ElementAt(1).Item1);
+            Assert.IsTrue(result.Item2.First().Item2.Contains(ds.Id));
+            Assert.IsTrue(result.Item2.ElementAt(1).Item2.Contains(join.Id));
+        }
     }
 }
