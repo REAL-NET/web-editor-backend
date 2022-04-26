@@ -184,6 +184,21 @@ namespace RepoConstraintsCheckTests
         }
 
         [Test]
+        public void CheckWithErrorInfoMaterializingOperatorsHaveTupleParentTest()
+        {
+            var queryModel = repo.Model(modelName);
+            var queryStrategy = new QueryConstraintsCheckStrategy(queryModel);
+            var checkSystem = new ConstraintsCheckSystem(queryModel, queryStrategy);
+            var sort = queryModel.Nodes.Where(x => x.Name == "aSort").FirstOrDefault();
+            sort.Attributes.Where(x => x.Name == "type").First().StringValue = "";
+            var result = checkSystem.CheckWithErrorInfo();
+            Assert.IsFalse(result.Item1);
+            Assert.AreEqual(2, result.Item2.Count());
+            Assert.AreEqual(10, result.Item2.ElementAt(1).Item1);
+            Assert.AreEqual(sort.Id, result.Item2.ElementAt(1).Item2.FirstOrDefault());
+        }
+
+        [Test]
         public void CheckWithErrorInfoChildrenTypesAreCorrectFirstTest()
         {
             var queryModel = repo.Model(modelName);

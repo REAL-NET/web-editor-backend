@@ -20,7 +20,8 @@ namespace RepoConstraintsCheck
              (6, "Last operator must be tuple"),
              (7, "Tuple operators must have tuple children"),
              (8, "Positional operators must have positional children"),
-             (9, "Materializing operators must have positional children")
+             (9, "Materializing operators must have positional children"),
+             (10, "Materializing operators must have tuple parent")
         });
 
         public QueryConstraintsCheckStrategy(IModel model)
@@ -35,6 +36,7 @@ namespace RepoConstraintsCheck
                 && CheckTupleOperatorsHaveNoReaders().Item1
                 && CheckLeavesAreDS().Item1
                 && CheckLastOperatorIsTuple().Item1
+                && CheckMaterializingOperatorsHaveTupleParent().Item1
                 && CheckChildrenTypesAreCorrect().Item1;
         }
 
@@ -46,6 +48,7 @@ namespace RepoConstraintsCheck
                 .Concat(CheckTupleOperatorsHaveNoReaders().Item2)
                 .Concat(CheckLeavesAreDS().Item2)
                 .Concat(CheckLastOperatorIsTuple().Item2)
+                .Concat(CheckMaterializingOperatorsHaveTupleParent().Item2)
                 .Concat(CheckChildrenTypesAreCorrect().Item2);
             return result;
         }
@@ -181,6 +184,40 @@ namespace RepoConstraintsCheck
             return result;
         }
 
+        private (bool, IEnumerable<(int, IEnumerable<int>)>) CheckMaterializingOperatorsHaveTupleParent()
+        {
+            var result = (true, Enumerable.Empty<(int, IEnumerable<int>)>());
+            result.Item2 = new List<(int, IEnumerable<int>)>();
+            foreach (var node in operators)
+            {
+                var type = node.Attributes.Where(x => x.Name == "type").FirstOrDefault();
+                if (type == null)
+                {
+                    result = AddErrorInfoToResult(result, 1, node.Id);
+                }
+                else
+                {
+                    if (node.Class.Name == "Aggregate" || node.Class.Name == "Materialize")
+                    {
+                        var incomingEdgesFromOperators = model.Edges.Where(x => x.To == node && x.From.Class.Name != "OperatorInternals");
+                        if (incomingEdgesFromOperators.Count() != 0)
+                        {
+                            foreach (var incomingEdge in incomingEdgesFromOperators)
+                            {
+                                var parentOperator = incomingEdge.From;
+                                var parentOperatorType = parentOperator.Attributes.Where(x => x.Name == "type").FirstOrDefault();
+                                if (parentOperatorType.StringValue != "tuple")
+                                {
+                                    result = AddErrorInfoToResult(result, 10, parentOperator.Id);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+
         private (bool, IEnumerable<(int, IEnumerable<int>)>) CheckChildrenTypesAreCorrect()
         {
             var result = (true, Enumerable.Empty<(int, IEnumerable<int>)>());
@@ -218,7 +255,7 @@ namespace RepoConstraintsCheck
                                     }
                                 }
                             }
-                            else
+                            else if (type.StringValue == "positional")
                             {
                                 if (childOperatorType.StringValue != "positional")
                                 {
