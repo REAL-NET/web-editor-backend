@@ -15,14 +15,9 @@ namespace RepoConstraintsCheck
             targetModel = model;
         }
 
-        public bool Check()
+        public (bool, IEnumerable<(int, IEnumerable<int>)>) Check()
         {
             return checkStrategy.Check(targetModel);
-        }
-
-        public (bool, IEnumerable<(int, IEnumerable<int>)>) CheckWithErrorInfo()
-        {
-            return checkStrategy.CheckWithErrorInfo(targetModel);
         }
 
         public int Count()

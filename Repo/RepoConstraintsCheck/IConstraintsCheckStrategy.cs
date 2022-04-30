@@ -5,7 +5,6 @@ namespace RepoConstraintsCheck
 {
     public interface IConstraintsCheckStrategy
     {
-        bool Check(IModel model);
-        (bool, IEnumerable<(int, IEnumerable<int>)>) CheckWithErrorInfo(IModel model);
+        (bool, IEnumerable<(int, IEnumerable<int>)>) Check(IModel model);
     }
 }

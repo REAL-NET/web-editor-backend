@@ -4,7 +4,6 @@ namespace RepoConstraintsCheck
 {
     public interface IConstraintsCheckSystem
     {
-        bool Check();
-        (bool, IEnumerable<(int, IEnumerable<int>)>) CheckWithErrorInfo();
+        (bool, IEnumerable<(int, IEnumerable<int>)>) Check();
     }
 }

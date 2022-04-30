@@ -30,20 +30,15 @@ namespace RepoConstraintsCheck
             operators = model.Nodes.Where(x => x.Attributes.Where(x => x.Name == "kind").FirstOrDefault().StringValue == "operator");
         }
 
-        public bool Check(IModel model)
+        public (bool, IEnumerable<(int, IEnumerable<int>)>) Check(IModel model)
         {
-            return CheckPositionalOperatorsHaveReaders().Item1
+            var result = (true, Enumerable.Empty<(int, IEnumerable<int>)>());
+            result.Item1 = CheckPositionalOperatorsHaveReaders().Item1
                 && CheckTupleOperatorsHaveNoReaders().Item1
                 && CheckLeavesAreDS().Item1
                 && CheckLastOperatorIsTuple().Item1
                 && CheckMaterializingOperatorsHaveTupleParent().Item1
                 && CheckChildrenTypesAreCorrect().Item1;
-        }
-
-        public (bool, IEnumerable<(int, IEnumerable<int>)>) CheckWithErrorInfo(IModel model)
-        {
-            var result = (true, Enumerable.Empty<(int, IEnumerable<int>)>());
-            result.Item1 = Check(model);
             result.Item2 = CheckPositionalOperatorsHaveReaders().Item2
                 .Concat(CheckTupleOperatorsHaveNoReaders().Item2)
                 .Concat(CheckLeavesAreDS().Item2)
@@ -217,6 +212,59 @@ namespace RepoConstraintsCheck
             }
             return result;
         }
+
+        //private (bool, IEnumerable<(int, IEnumerable<int>)>) CheckMaterializationLinePositionIsCorrect()
+        //{
+        //    var result = (true, Enumerable.Empty<(int, IEnumerable<int>)>());
+        //    result.Item2 = new List<(int, IEnumerable<int>)>();
+        //    var materializationLine = model.Nodes.Where(x => x.Attributes.Where(x => x.Name == "kind")
+        //    .FirstOrDefault().StringValue == "materializationLine");
+        //    //foreach (var node in operators)
+        //    //{
+        //    //    var type = node.Attributes.Where(x => x.Name == "type").FirstOrDefault();
+        //    //    if (type == null)
+        //    //    {
+        //    //        result = AddErrorInfoToResult(result, 1, node.Id);
+        //    //    }
+        //    //    else
+        //    //    {
+        //    //        var outgoingEdgesToOperators = model.Edges.Where(x => x.From == node && x.To.Class.Name != "Read");
+        //    //        if (outgoingEdgesToOperators.Count() != 0)
+        //    //        {
+        //    //            foreach (var outgoingEdge in outgoingEdgesToOperators)
+        //    //            {
+        //    //                var childOperator = outgoingEdge.To;
+        //    //                var childOperatorType = childOperator.Attributes.Where(x => x.Name == "type").FirstOrDefault();
+        //    //                if (type.StringValue == "tuple")
+        //    //                {
+        //    //                    if (node.Class.Name != "Aggregate" && node.Class.Name != "Materialize")
+        //    //                    {
+        //    //                        if (childOperatorType.StringValue != "tuple")
+        //    //                        {
+        //    //                            result = AddErrorInfoToResult(result, 7, childOperator.Id);
+        //    //                        }
+        //    //                    }
+        //    //                    else
+        //    //                    {
+        //    //                        if (childOperatorType.StringValue != "positional")
+        //    //                        {
+        //    //                            result = AddErrorInfoToResult(result, 9, childOperator.Id);
+        //    //                        }
+        //    //                    }
+        //    //                }
+        //    //                else if (type.StringValue == "positional")
+        //    //                {
+        //    //                    if (childOperatorType.StringValue != "positional")
+        //    //                    {
+        //    //                        result = AddErrorInfoToResult(result, 8, childOperator.Id);
+        //    //                    }
+        //    //                }
+        //    //            }
+        //    //        }
+        //    //    }
+        //    //}
+        //    return result;
+        //}
 
         private (bool, IEnumerable<(int, IEnumerable<int>)>) CheckChildrenTypesAreCorrect()
         {

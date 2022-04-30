@@ -70,21 +70,7 @@ namespace RepoAPI.Controllers
         }
 
         [HttpGet("queryCheck/{targetModel}")]
-        public ActionResult<bool> QueryCheckModel(string targetModel)
-        {
-            var result = false;
-            lock (Locker.obj)
-            {
-                this.targetModel = RepoContainer.CurrentRepo().Model(targetModel);
-                var queryStrategy = new QueryConstraintsCheckStrategy(this.targetModel);
-                var checkSystem = new ConstraintsCheckSystem(this.targetModel, queryStrategy);
-                result = checkSystem.Check();
-            }
-            return result;
-        }
-
-        [HttpGet("queryCheckWithErrorInfo/{targetModel}")]
-        public ActionResult<string> QueryCheckWithInfoModel(string targetModel)
+        public ActionResult<string> QueryCheckModel(string targetModel)
         {
             var result = (false, Enumerable.Empty<(int, IEnumerable<int>)>());
             lock (Locker.obj)
@@ -92,7 +78,7 @@ namespace RepoAPI.Controllers
                 this.targetModel = RepoContainer.CurrentRepo().Model(targetModel);
                 var queryStrategy = new QueryConstraintsCheckStrategy(this.targetModel);
                 var checkSystem = new ConstraintsCheckSystem(this.targetModel, queryStrategy);
-                result = checkSystem.CheckWithErrorInfo();
+                result = checkSystem.Check();
             }
             var output = "{";
             output += $"\"result\":{result.Item1.ToString().ToLower()}";
