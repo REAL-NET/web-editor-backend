@@ -13,4 +13,5 @@ RUN dotnet publish -c Release -o out
 
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.0 AS runtime
 COPY --from=build /app/out .
-ENTRYPOINT ["dotnet", "Auth.dll"]
+# ENTRYPOINT ["dotnet", "Auth.dll"]
+CMD ASPNETCORE_URLS=http://*:$PORT dotnet Auth.dll

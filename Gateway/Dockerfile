@@ -13,4 +13,5 @@ RUN dotnet publish -c Release -o out
 
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.0 AS runtime
 COPY --from=build /app/out .
-ENTRYPOINT ["dotnet", "Gateway.dll"]
+# ENTRYPOINT ["dotnet", "Gateway.dll"]
+CMD ASPNETCORE_URLS=http://*:$PORT dotnet Gateway.dll
