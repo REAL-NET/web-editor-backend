@@ -35,7 +35,11 @@
       ],
       "UpstreamPathTemplate": "/api/repo/swagger",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
-      "Priority": 2
+      "Priority": 2,
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
     },
     {
       "DownstreamPathTemplate": "/swagger/{next}",
@@ -48,7 +52,11 @@
       ],
       "UpstreamPathTemplate": "/api/repo/swagger/{next}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
-      "Priority": 1
+      "Priority": 1,
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
     },
     {
       "DownstreamPathTemplate": "/api/{next}",
@@ -61,7 +69,11 @@
       ],
       "UpstreamPathTemplate": "/api/repo/{next}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
-      "Priority": 0
+      "Priority": 0,
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
     },
     {
       "DownstreamPathTemplate": "/swagger",
@@ -74,7 +86,11 @@
       ],
       "UpstreamPathTemplate": "/api/storage/swagger",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
-      "Priority": 2
+      "Priority": 2,
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
     },
     {
       "DownstreamPathTemplate": "/swagger/{next}",
@@ -87,7 +103,11 @@
       ],
       "UpstreamPathTemplate": "/api/storage/swagger/{next}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
-      "Priority": 1
+      "Priority": 1,
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
     },
     {
       "DownstreamPathTemplate": "/storage/{next}",
@@ -100,7 +120,11 @@
       ],
       "UpstreamPathTemplate": "/api/storage/{next}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
-      "Priority": 0
+      "Priority": 0,
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
     },
     {
       "DownstreamPathTemplate": "/swagger",
@@ -113,7 +137,11 @@
       ],
       "UpstreamPathTemplate": "/api/generator/swagger",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
-      "Priority": 2
+      "Priority": 2,
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
     },
     {
       "DownstreamPathTemplate": "/swagger/{next}",
@@ -126,7 +154,11 @@
       ],
       "UpstreamPathTemplate": "/api/generator/swagger/{next}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
-      "Priority": 1
+      "Priority": 1,
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
     },
     {
       "DownstreamPathTemplate": "/generator/{next}",
@@ -139,7 +171,11 @@
       ],
       "UpstreamPathTemplate": "/api/generator/{next}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
-      "Priority": 0
+      "Priority": 0,
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
     },
     {
       "DownstreamPathTemplate": "/test/hello",
